@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">StoreX</string>
+    <string name="title_activity_main">StoreX</string>
+    <string name="package_name">com.storex.app</string>
+    <string name="custom_url_scheme">com.storex.app</string>
+</resources>
