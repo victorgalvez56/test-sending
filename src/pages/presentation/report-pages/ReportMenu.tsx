@@ -1,18 +1,16 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useContext } from 'react';
 
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
-import { deleteUser, getUsers } from '../../../services/UsersService';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
-import AuthContext, { User } from '../../../contexts/authContext';
+import AuthContext from '../../../contexts/authContext';
 import Icon from '../../../components/icon/Icon';
 import { Link } from 'react-router-dom';
 

@@ -47,9 +47,8 @@ const APP = {
 		SEARCH: lazy(() => import('../pages/presentation/transactions/SearchTransactionPage')),
 	},
 	INVOICES: {
-		DETAILS: lazy(() => import('../pages/presentation/invoice-page/InvoicePage'))
-	}
-	,
+		DETAILS: lazy(() => import('../pages/presentation/invoice-page/InvoicePage')),
+	},
 	REPORTS: {
 		INDEX: lazy(() => import('../pages/presentation/report-pages/ReportMenu')),
 		DETAIL: lazy(() => import('../pages/presentation/report-pages/ReportDetail')),
@@ -57,7 +56,7 @@ const APP = {
 		BYCOUNTRY: lazy(() => import('../pages/presentation/report-pages/ReportByCountry')),
 		FORMAT1: lazy(() => import('../pages/presentation/report-pages/ReportFormat1')),
 		SENDER: lazy(() => import('../pages/presentation/report-pages/ReportSender')),
-		SUMMARIZED: lazy(() => import('../pages/presentation/report-pages/ReportSummarized'))
+		SUMMARIZED: lazy(() => import('../pages/presentation/report-pages/ReportSummarized')),
 	},
 };
 const PAGE_LAYOUTS = {
@@ -298,8 +297,9 @@ const presentation: RouteProps[] = [
 	},
 	{
 		path: 'InvoiceTransaction',
-		element: <APP.INVOICES.DETAILS />
-	}, {
+		element: <APP.INVOICES.DETAILS />,
+	},
+	{
 		path: adminPagesMenu.reports.path,
 		element: <APP.REPORTS.INDEX />,
 	},

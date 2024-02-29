@@ -33,8 +33,7 @@ interface IAnswerCustomerProps {
 	color: TColor | 'link' | 'brand' | 'brand-two' | 'storybook';
 }
 const AnswerCustomer: FC<IAnswerCustomerProps> = (props: IAnswerCustomerProps) => {
-	const { id, imgWebp, img, name, job, value, color } = props;
-	const { darkModeStatus } = useDarkMode();
+	const { imgWebp, img, name, job, value, color } = props;
 
 	const [state] = useState<IChartOptions>({
 		series: [value],

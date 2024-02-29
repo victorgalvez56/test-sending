@@ -1,27 +1,17 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Card, { CardBody, CardHeader } from '../../../components/bootstrap/Card';
+import Card, { CardHeader } from '../../../components/bootstrap/Card';
 import { Tabs2 } from '../../../components/transactions/Tabs';
 import SenderInformation from '../../../components/invoices/SenderInformation';
 import RecipientInformation from '../../../components/invoices/RecipientInformation';
 import InvoiceInformation from '../../../components/invoices/InvoiceInformation';
 import PaymentInformation from '../../../components/invoices/PaymentInformation';
 import ReceiptPos from '../../../components/invoices/ReceiptPos';
-import ReceiptOnePage from '../../../components/invoices/ReceiptOnePage';
-import Modal, {
-	ModalBody,
-	ModalFooter,
-	ModalHeader,
-	ModalTitle,
-} from '../../../components/bootstrap/Modal';
-import Input from '../../../components/bootstrap/forms/Input';
-import { styles } from '../../../steps';
+import Modal, { ModalBody, ModalFooter, ModalTitle } from '../../../components/bootstrap/Modal';
 import {
 	InvoiceReponse,
 	getInvoiceId,
@@ -30,8 +20,9 @@ import {
 	Recipient,
 	getRecipientId,
 } from '../../../services/InvoiceServices';
-import { useLocation, useParams } from 'react-router-dom';
-import AuthContext, { User } from '../../../contexts/authContext';
+import { useLocation } from 'react-router-dom';
+import AuthContext from '../../../contexts/authContext';
+import ReceiptOnePage from '../../../components/invoices/ReceiptOnePage';
 
 const InvoicePage = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -42,13 +33,12 @@ const InvoicePage = () => {
 	const [PrintModal, setPrintModal] = useState<boolean>(false);
 	const [currencyListOrigin, setCurrencyListOrigin] = useState([]);
 	const [currencyListDes, setCurrencyListDes] = useState([]);
-	const [bankAccounts, setBankAccounts] = useState([]);
 	const [items, setItems] = useState<InvoiceReponse[]>([]);
 	const [itemsSender, setItemsSender] = useState<Sender[]>([]);
 	const [itemsRecipient, setItemsRecipient] = useState<Recipient[]>([]);
 	const { user, setUser } = useContext(AuthContext);
 
-	console.error('qaq',user)
+	console.error('qaq', user);
 	const location = useLocation();
 
 	const [selectedTab, setSelectedTab] = useState(1);
@@ -129,7 +119,7 @@ const InvoicePage = () => {
 										<label className='col-12 col-md-3 '>
 											<div key={index}>
 												<label className='m-2'>
-													Date: {item.preReceiptDate}
+													Date: {item.preReceiptDate.split('T')[0]}
 												</label>
 											</div>
 										</label>
@@ -203,10 +193,10 @@ const InvoicePage = () => {
 										<RecipientInformation items={itemsRecipient} />
 									</div>
 									<div className={3 === selectedTab ? '' : 'd-none'}>
-										<InvoiceInformation />
+										<InvoiceInformation items={items} />
 									</div>
 									<div className={4 === selectedTab ? '' : 'd-none'}>
-										<PaymentInformation />
+										<PaymentInformation items={items}  />
 									</div>
 								</>
 							))}
@@ -759,7 +749,7 @@ const InvoicePage = () => {
 				</ModalTitle>
 				<ModalBody id='modalContent'>
 				{/* {tipo === 1 ? ReceiptOnePage items={items}  : tipo === 2 ? <ReceiptPos items={items} /> : null} */}
-					<ReceiptPos items={items} />
+				<ReceiptOnePage items={items} />
 				</ModalBody>
 			</Modal>
 		</PageWrapper>

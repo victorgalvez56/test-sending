@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -16,20 +16,15 @@ import Card, {
 import classNames from 'classnames';
 import UserUpdate from './UserUpdate';
 import UserCreate from './UserCreate';
-import AuthContext, { User } from '../../../contexts/authContext';
-import Modal, {
-	ModalBody,
-	ModalFooter,
-	ModalHeader,
-	ModalTitle,
-} from '../../../components/bootstrap/Modal';
+import { User } from '../../../contexts/authContext';
+import Modal, { ModalBody, ModalFooter } from '../../../components/bootstrap/Modal';
 import { t } from 'i18next';
 import { getSession } from '../../../services/AuthService';
 
 const UsersListPage = () => {
 	const { darkModeStatus } = useDarkMode();
-	const session = getSession()
-	console.warn(session)
+	const session = getSession();
+	console.warn(session);
 	const [listUsers, setListUsers] = useState<User[]>([]);
 	const [userUpdate, setUserUpdate] = useState<User>();
 	const [editOffcanvas, setEditOffcanvas] = useState(false);
@@ -38,7 +33,9 @@ const UsersListPage = () => {
 	const [openModal, setOpenModal] = useState(false);
 
 	useEffect(() => {
-		initial();
+		return () => {
+			initial();
+		};
 	}, []);
 
 	const initial = () => {
@@ -54,10 +51,10 @@ const UsersListPage = () => {
 			);
 		}
 	};
-	const deleteUserHandler = (userDelete: number) => {
+	const deleteUserHandler = (userDeleteId: number) => {
 		deleteUser(
 			session.user.identityCode,
-			userDelete,
+			userDeleteId,
 			(data) => {
 				initial();
 			},
@@ -124,84 +121,84 @@ const UsersListPage = () => {
 												<td>
 													{session.user.secLevel === 'S'
 														? item.secLevel !== 'A' && (
-															<>
-																<Button
-																	isOutline={!darkModeStatus}
-																	color='dark'
-																	isLight={darkModeStatus}
-																	className={classNames(
-																		'text-nowrap',
-																		{
-																			'border-light':
-																				!darkModeStatus,
-																		},
-																	)}
-																	icon='Edit'
-																	onClick={() => {
-																		setUserUpdate(item);
-																		setEditOffcanvas(true);
-																	}}>
-																	Edit
-																</Button>
-																<Button
-																	isOutline={!darkModeStatus}
-																	color='dark'
-																	isLight={darkModeStatus}
-																	className={classNames(
-																		'text-nowrap',
-																		{
-																			'border-light':
-																				!darkModeStatus,
-																		},
-																	)}
-																	icon='Delete'
-																	onClick={() => { }}>
-																	Delete
-																</Button>
-															</>
-														)
+																<>
+																	<Button
+																		isOutline={!darkModeStatus}
+																		color='dark'
+																		isLight={darkModeStatus}
+																		className={classNames(
+																			'text-nowrap',
+																			{
+																				'border-light':
+																					!darkModeStatus,
+																			},
+																		)}
+																		icon='Edit'
+																		onClick={() => {
+																			setUserUpdate(item);
+																			setEditOffcanvas(true);
+																		}}>
+																		Edit
+																	</Button>
+																	<Button
+																		isOutline={!darkModeStatus}
+																		color='dark'
+																		isLight={darkModeStatus}
+																		className={classNames(
+																			'text-nowrap',
+																			{
+																				'border-light':
+																					!darkModeStatus,
+																			},
+																		)}
+																		icon='Delete'
+																		onClick={() => {}}>
+																		Delete
+																	</Button>
+																</>
+														  )
 														: session.user.secLevel === 'A' && (
-															<>
-																<Button
-																	isOutline={!darkModeStatus}
-																	color='dark'
-																	isLight={darkModeStatus}
-																	className={classNames(
-																		'text-nowrap',
-																		{
-																			'border-light':
-																				!darkModeStatus,
-																		},
-																	)}
-																	icon='Edit'
-																	onClick={() => {
-																		setUserUpdate(item);
-																		setEditOffcanvas(true);
-																	}}>
-																	Edit
-																</Button>
-																<Button
-																	isOutline={!darkModeStatus}
-																	color='dark'
-																	isLight={darkModeStatus}
-																	className={classNames(
-																		'text-nowrap',
-																		{
-																			'border-light':
-																				!darkModeStatus,
-																		},
-																	)}
-																	icon='Delete'
-																	onClick={() => {
-																		setOpenModal(true);
-																		setUserDelete(
-																			item.identityCode,
-																		);
-																	}}>
-																	Delete
-																</Button>
-															</>
-														)}
+																<>
+																	<Button
+																		isOutline={!darkModeStatus}
+																		color='dark'
+																		isLight={darkModeStatus}
+																		className={classNames(
+																			'text-nowrap',
+																			{
+																				'border-light':
+																					!darkModeStatus,
+																			},
+																		)}
+																		icon='Edit'
+																		onClick={() => {
+																			setUserUpdate(item);
+																			setEditOffcanvas(true);
+																		}}>
+																		Edit
+																	</Button>
+																	<Button
+																		isOutline={!darkModeStatus}
+																		color='dark'
+																		isLight={darkModeStatus}
+																		className={classNames(
+																			'text-nowrap',
+																			{
+																				'border-light':
+																					!darkModeStatus,
+																			},
+																		)}
+																		icon='Delete'
+																		onClick={() => {
+																			setOpenModal(true);
+																			setUserDelete(
+																				item.identityCode,
+																			);
+																		}}>
+																		Delete
+																	</Button>
+																</>
+														  )}
 												</td>
 											</tr>
 										))}

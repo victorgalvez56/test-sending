@@ -13,10 +13,14 @@ import {
 	getNationalities,
 	getRateServiceType,
 	getTypeidentification,
+	getRecipientRelationship,
 } from '../../../services/TransactionsService';
-import { getRecipientRelationship } from '../../../services/TransactionsService';
-import { Countries, Reasons, getReasons } from '../../../services/NewTransactionService';
-import { getCountries } from '../../../services/NewTransactionService';
+import {
+	Countries,
+	Reasons,
+	getReasons,
+	getCountries,
+} from '../../../services/NewTransactionService';
 import Label from '../../../components/bootstrap/forms/Label';
 import SenderCard from '../../../components/transactions/SenderCard';
 import RecipientCard from '../../../components/transactions/RecipientCard';
@@ -29,9 +33,9 @@ const NewTransactionPage = () => {
 	const [nationalitiesList, setNationalitiesList] = useState<ListsSelect[]>([]);
 	const [typeIndentificationList, setTypeIndentificationList] = useState<ListsSelect[]>([]);
 	const [bankAccountingTypeList, setBankAccountingTypeList] = useState<ListsSelect[]>([]);
-	const [countriesList, setCountriesList] = useState([]);
+	const [countriesList, setCountriesList] = useState<ListsSelect[]>([]);
 	const [reasonList, setReasonList] = useState([]);
-	const [serviceList, setServiceList] = useState<Reasons[]>([]);
+	const [serviceList, setServiceList] = useState<ListsSelect[]>([]);
 	const [relationShip, setRelationShip] = useState([]);
 	const [selectedTab, setSelectedTab] = useState(1);
 	const [tabValidity, setTabValidity] = useState([true, false, false]); // Inicialmente, solo la pestaña 1 es válida
@@ -199,37 +203,29 @@ const NewTransactionPage = () => {
 					</CardHeader>
 					<div className={1 === selectedTab ? '' : 'd-none'}>
 						<SenderCard
-							props={{
-								phone1List,
-								locationsList,
-								countriesList,
-								nationalitiesList,
-								typeIndentificationList,
-								setTabValidity,
-								setSelectedTab,
-							}}
+							countriesList={countriesList}
+							typeIndentificationList={typeIndentificationList}
+							setTabValidity={setTabValidity}
+							setSelectedTab={setSelectedTab}
 						/>
 					</div>
 					<div className={2 === selectedTab ? '' : 'd-none'}>
 						<RecipientCard
-							props={{
-								countriesList,
-								nationalitiesList,
-								relationShip,
-								reasonList,
-								typeIndentificationList,
-								locationsList,
-								setTabValidity,
-								setSelectedTab,
-							}}
+							countriesList={countriesList}
+							nationalitiesList={nationalitiesList}
+							relationShip={relationShip}
+							reasonList={reasonList}
+							typeIndentificationList={typeIndentificationList}
+							setTabValidity={setTabValidity}
+							setSelectedTab={setSelectedTab}
 						/>
 					</div>
 					<div className={3 === selectedTab ? '' : 'd-none'}>
 						<InvoiceCard
-							props={{
-								bankAccountingTypeList,
-								serviceList,
-							}}
+							bankAccountingTypeList={bankAccountingTypeList}
+							serviceList={serviceList}
+							setTabValidity={setTabValidity}
+							setSelectedTab={setSelectedTab}
 						/>
 					</div>
 				</Card>

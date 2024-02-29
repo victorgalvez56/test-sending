@@ -1,18 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react';
-import Button from '../bootstrap/Button';
-import Page from '../../layout/Page/Page';
-import PageWrapper from '../../layout/PageWrapper/PageWrapper';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import useDarkMode from '../../hooks/useDarkMode';
-import Card, { CardBody, CardHeader } from '../bootstrap/Card';
+import React from 'react';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
-import InputGroup from '../bootstrap/forms/InputGroup';
-import Select from '../bootstrap/forms/Select';
 import Checks from '../bootstrap/forms/Checks';
-import { Tabs2 } from '../transactions/Tabs';
-import { demoPagesMenu } from '../../menu';
 import { Recipient } from '../../services/InvoiceServices';
 
 interface RecipientInformationProps {
@@ -23,7 +12,7 @@ export const RecipientInformation: React.FC<RecipientInformationProps> = ({ item
 	return (
 		<>
 			{items.map((item, index) => (
-				<div className='row mt-2'>
+				<div key={index} className='row mt-2'>
 					<div className='col-md-2 m-2'>
 						<FormGroup id='fname' label='First Name'>
 							<Input

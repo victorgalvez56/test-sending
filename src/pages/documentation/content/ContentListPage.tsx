@@ -52,7 +52,7 @@ const ContentListPage = () => {
 			<Page>
 				<div className='row'>
 					{Object.keys(contents)
-						.filter((key)=>
+						.filter((key) =>
 							contents[key].text
 								.toLowerCase()
 								.includes(formik.values.searchInput.toLowerCase()),

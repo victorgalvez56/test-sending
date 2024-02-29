@@ -1,6 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState, useContext } from 'react';
 import Button from '../../../components/bootstrap/Button';
-import useDarkMode from '../../../hooks/useDarkMode';
 import {
 	Agency,
 	AgencyCatalogsList,
@@ -33,16 +32,12 @@ const UserCreate: React.FC<ChildProps> = ({
 	setCreateOffcanvas,
 	setListUsers,
 }: ChildProps) => {
-	const { themeStatus, darkModeStatus } = useDarkMode();
-	const { user, setUser } = useContext(AuthContext);
+	const { user } = useContext(AuthContext);
 
 	const [agencyStatus, setAgencyStatus] = useState<AgencyCatalogsList[]>([]);
 	const [agencySecurityLevels, setAgencySecurityLevels] = useState<AgencyCatalogsList[]>([]);
 	const [languages, setLanguages] = useState<AgencyCatalogsList[]>([]);
-	const [learningStatus, setLearningStatus] = useState<AgencyCatalogsList[]>([
-		{ value: 'True', text: 'True', label: '' },
-		{ value: 'False', text: 'False', label: '' },
-	]);
+
 	useEffect(() => {
 		getAgencyStatus(
 			(data) => {
@@ -85,8 +80,8 @@ const UserCreate: React.FC<ChildProps> = ({
 		getLanguages(
 			(data) => {
 				const list = data.data.reduce(
-					(acc: AgencyCatalogsList[], languages: Agency, index) => {
-						const { name, code } = languages;
+					(acc: AgencyCatalogsList[], language: Agency, index) => {
+						const { name, code } = language;
 						acc[index] = { value: code, text: name };
 						return acc;
 					},
@@ -132,8 +127,8 @@ const UserCreate: React.FC<ChildProps> = ({
 		onSubmit: (values, { resetForm }) => {
 			createUser(
 				values,
-				(data) => {
-					showNotificationGlobal(data.message, true);
+				(response) => {
+					showNotificationGlobal(response.message, true);
 					if (user) {
 						getUsers(
 							user.identityCode,

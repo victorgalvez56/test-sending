@@ -1,28 +1,23 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useContext } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 
 import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
-import { deleteUser, getUsers } from '../../../services/UsersService';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import * as Yup from 'yup';
-import Label from '../../../components/bootstrap/forms/Label';
 import { useFormik } from 'formik';
-import Icon from '../../../components/icon/Icon';
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
-import AuthContext, { User } from '../../../contexts/authContext';
+import AuthContext from '../../../contexts/authContext';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
-import Select, { StylesConfig } from 'react-select';
+import Select from 'react-select';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
 
 const ReportBill = () => {

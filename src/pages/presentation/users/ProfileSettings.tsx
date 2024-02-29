@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Icon from '../../../components/icon/Icon';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
@@ -17,7 +17,7 @@ import {
 import * as Yup from 'yup';
 import AuthContext, { User } from '../../../contexts/authContext';
 import moment, { Moment } from 'moment';
-import { FormikHelpers, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import Card, {
 	CardActions,
 	CardBody,
@@ -47,17 +47,6 @@ const UsersListPage = () => {
 	const [agencySecurityLevels, setAgencySecurityLevels] = useState<AgencyCatalogsList[]>([]);
 	const [lastSave, setLastSave] = useState<Moment | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const handleSave = () => {
-		setLastSave(moment());
-		setIsLoading(false);
-		showNotification(
-			<span className='d-flex align-items-center'>
-				<Icon icon='Info' size='lg' className='me-1' />
-				<span>Updated Successfully</span>
-			</span>,
-			"The user's account details have been successfully updated.",
-		);
-	};
 
 	useEffect(() => {
 		getUsers(

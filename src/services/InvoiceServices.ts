@@ -236,6 +236,19 @@ export interface InvoiceReponse {
 	appId: string;
 	idUsr: string;
 	usrType: string;
+	paymentG: {
+		identityCode: string;
+		payee: string;
+		payeeCashier: string;
+		recipient: string;
+		recipientIdType: string;
+		recipientIdNumber: string;
+		date: string;
+		dateActual: string;
+		systemUser: string;
+		confirmationSent: string;
+		paymentMode: string;
+	};
 }
 
 export interface Sender {
@@ -388,6 +401,16 @@ export interface SenderResponse extends GeneralResponse {
 export interface RecipientResponse extends GeneralResponse {
 	data: Recipient[];
 }
+export interface AgencyStatusResponse extends GeneralResponse {
+	data: Agency[];
+}
+export interface Agency {
+	code: string;
+	name: string;
+	appId: number;
+	idUsr: string;
+	usrType: string;
+}
 
 export const getInvoiceId = async (
 	inV_CODE: number | undefined,
@@ -415,15 +438,41 @@ export const getSenderId = async (
 		HttpMethod.GET,
 	);
 
-	export const getRecipientId = async (
-		inV_CODE: number | undefined,
-		resultHandler: (response: RecipientResponse) => void,
-		errorHandler: ErrorHandler,
-	) =>
-		myFetch<RecipientResponse>(
-			'Recipient/api/Recipient/' + inV_CODE,
-			'',
-			resultHandler,
-			errorHandler,
-			HttpMethod.GET,
-		);
+export const getRecipientId = async (
+	inV_CODE: number | undefined,
+	resultHandler: (response: RecipientResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<RecipientResponse>(
+		'Recipient/api/Recipient/' + inV_CODE,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);
+
+export const getBankAccountType = async (
+	type_code: string | undefined,
+	resultHandler: (response: AgencyStatusResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<AgencyStatusResponse>(
+		'Bank/api/BankAccountType/' + type_code,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);
+
+export const getTypeidentification = async (
+	type_code: string | undefined,
+	resultHandler: (response: AgencyStatusResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<AgencyStatusResponse>(
+		'Catalogs/api/TypeIdentification/' + type_code,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);

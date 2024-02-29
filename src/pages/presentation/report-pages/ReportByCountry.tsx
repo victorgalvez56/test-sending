@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useState } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -11,10 +11,9 @@ import Card, {
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import classNames from 'classnames';
-import AuthContext, { User } from '../../../contexts/authContext';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
-import Select, { StylesConfig } from 'react-select';
+import Select from 'react-select';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import * as Yup from 'yup';
 import Label from '../../../components/bootstrap/forms/Label';

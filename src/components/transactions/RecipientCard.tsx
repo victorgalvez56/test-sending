@@ -25,22 +25,41 @@ import { colourStyles } from '../../helpers/helpers';
 import { useTransactionSweet } from '../../contexts/transactionContext';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
 import { getSession } from '../../services/AuthService';
+import PropTypes from 'prop-types';
 
-export const RecipientCard = ({ ...props }) => {
+interface RecipientCardProps {
+	countriesList: ListsSelect[];
+	typeIndentificationList: ListsSelect[];
+	setSelectedTab: any;
+	setTabValidity: any;
+	nationalitiesList: ListsSelect[];
+	relationShip: ListsSelect[];
+	reasonList: ListsSelect[];
+}
+
+export const RecipientCard: React.FC<RecipientCardProps> = ({
+	countriesList,
+	typeIndentificationList,
+	setSelectedTab,
+	setTabValidity,
+	nationalitiesList,
+	relationShip,
+	reasonList,
+}) => {
 	const userSession = getSession();
 	const [changeRecipientOld, setChangeRecipientOld] = useState(true);
 	const [reasonRecipient, setReasonRecipient] = useState('');
 	const [statesList, setStatesList] = useState<ListsSelect[]>([]);
 	const [citiesList, setCitiesList] = useState<ListsSelect[]>([]);
-	const [selectedCountry, setSelectedCountry] = useState<ListsSelect>();
-	const [selectedState, setSelectedState] = useState<ListsSelect>();
-	const [selectedCity, setSelectedCity] = useState<ListsSelect>();
+	const [selectedCountry, setSelectedCountry] = useState<ListsSelect | null>();
+	const [selectedState, setSelectedState] = useState<ListsSelect | null>();
+	const [selectedCity, setSelectedCity] = useState<ListsSelect | null>();
 	const [recipients, setRecipients] = useState<Recipients[]>([]);
 	const [isOpenInvoice, setIsOpenInvoice] = useState<boolean>(false);
 	const [invoices, setInvoices] = useState<Invoices[]>([]);
 	const [
-		{ senderInformation, recipientInformation },
-		{ setRecipientInformation, setInvoiceCountry, setInvoiceCity },
+		{ senderInformation },
+		{ setRecipientInformation, setInvoiceCountry, setInvoiceCity, setInvoiceInformation },
 	] = useTransactionSweet();
 
 	useEffect(() => {
@@ -48,7 +67,6 @@ export const RecipientCard = ({ ...props }) => {
 			getRecipientsBySender(
 				senderInformation.code,
 				(response) => {
-					console.error(response.data);
 					setRecipients(response.data);
 				},
 				() => {},
@@ -124,13 +142,15 @@ export const RecipientCard = ({ ...props }) => {
 			state: Yup.string().required('Required'),
 			city: Yup.string().required('Required'),
 			phone1: Yup.string().required('Required'),
+			birthDate: Yup.string().required('Required'),
+			identityCode: Yup.string().required('Required'),
 		}),
 		onSubmit: (values, { resetForm }) => {
 			setRecipientInformation(values);
 			GetAllInvoiceByRecipient(
-				userSession.user.agency,
+				userSession.user.company,
 				senderInformation.code,
-				recipientInformation.code,
+				values.code,
 				(response) => {
 					setInvoices(response.data);
 					setIsOpenInvoice(true);
@@ -141,14 +161,21 @@ export const RecipientCard = ({ ...props }) => {
 	});
 
 	const takeInvoice = (invoice: Invoices) => {
-		console.error('INVOICE:::', invoice);
+		setInvoiceInformation(invoice);
+		setIsOpenInvoice(false);
+		// setSelectedCountry(null);
+		// setSelectedState(null);
+		// setSelectedCity(null);
+		// formik.resetForm();
+		setSelectedTab(3);
+		setTabValidity([true, true, true]);
 	};
 
 	const handleSelectChange = (selectedOption: ListsSelect, typeSearch: string) => {
 		switch (typeSearch) {
 			case 'country':
 				if (selectedOption) {
-					let findCountry = props.props.countriesList.find(
+					let findCountry = countriesList.find(
 						(country: ListsSelect) => country.value == selectedOption.value,
 					);
 					if (findCountry) {
@@ -196,7 +223,7 @@ export const RecipientCard = ({ ...props }) => {
 				break;
 			case 'nationality':
 				if (selectedOption) {
-					let findNationality = props.props.nationalitiesList.find(
+					let findNationality = nationalitiesList.find(
 						(nationality: ListsSelect) => nationality.value == selectedOption.value,
 					);
 					if (findNationality) {
@@ -209,7 +236,7 @@ export const RecipientCard = ({ ...props }) => {
 		}
 	};
 
-	const getStatesApi = (codeCountry: string) => {
+	const getStatesApi = (codeCountry: string | number) => {
 		getStates(
 			codeCountry,
 			(response) => {
@@ -251,6 +278,7 @@ export const RecipientCard = ({ ...props }) => {
 		getRecipient(
 			recipient.code,
 			(response: RecipientsResponse) => {
+				console.error('hdhbhbsahbdshbadhk', response.data[0]);
 				setSelectedCountry({
 					value: response.data[0].codeCountry,
 					label: response.data[0].country,
@@ -277,14 +305,19 @@ export const RecipientCard = ({ ...props }) => {
 
 	const handleKeyDown = (event: any) => {
 		if (event.key === 'Tab') {
-			props.props.setActiveTab('invoice');
+			setSelectedTab(3);
+			setTabValidity([true, true, true]);
 		}
 	};
 
 	const skip = () => {
 		setIsOpenInvoice(false);
-		props.props.setSelectedTab(3);
-		props.props.setTabValidity([true, true, true]);
+		// setSelectedCountry(null);
+		// setSelectedState(null);
+		// setSelectedCity(null);
+		// formik.resetForm();
+		setSelectedTab(3);
+		setTabValidity([true, true, true]);
 	};
 
 	return (
@@ -515,7 +548,7 @@ export const RecipientCard = ({ ...props }) => {
 										isDisabled={false}
 										isRtl={false}
 										name='color'
-										options={props.props.countriesList}
+										options={countriesList}
 										value={selectedCountry}
 										onChange={(value) => {
 											handleSelectChange(value, 'country');
@@ -688,7 +721,7 @@ export const RecipientCard = ({ ...props }) => {
 									<Select2
 										ariaLabel='ID Type'
 										placeholder='Choose...'
-										list={props.props.typeIndentificationList}
+										list={typeIndentificationList}
 										value={formik.values.typeId}
 										onChange={(e: { target: { value: string | any[] } }) => {
 											formik.setFieldValue('typeId', e.target.value);
@@ -711,7 +744,7 @@ export const RecipientCard = ({ ...props }) => {
 										ariaLabel='Reason'
 										placeholder='Choose...'
 										value={reasonRecipient}
-										list={props.props.reasonList}
+										list={reasonList}
 										onChange={(e: { target: { value: string | any[] } }) => {
 											setReasonRecipient(e.target.value.toString());
 										}}
@@ -732,7 +765,7 @@ export const RecipientCard = ({ ...props }) => {
 									<Select2
 										ariaLabel='Country'
 										placeholder='Choose...'
-										list={props.props.relationShip}
+										list={relationShip}
 										value={formik.values.relationship}
 										onChange={(e: { target: { value: string | any[] } }) => {
 											formik.setFieldValue('relationship', e.target.value);
@@ -777,7 +810,7 @@ export const RecipientCard = ({ ...props }) => {
 										isDisabled={false}
 										isRtl={false}
 										name='color'
-										options={props.props.nationalitiesList}
+										options={nationalitiesList}
 										// defaultValue={formik.values.nationality}
 										onChange={(value) => {
 											handleSelectChange(value, 'nationality');
@@ -828,5 +861,15 @@ export const RecipientCard = ({ ...props }) => {
 			)}
 		</div>
 	);
+};
+
+RecipientCard.propTypes = {
+	countriesList: PropTypes.array.isRequired,
+	typeIndentificationList: PropTypes.array.isRequired,
+	setSelectedTab: PropTypes.any.isRequired,
+	setTabValidity: PropTypes.any.isRequired,
+	nationalitiesList: PropTypes.array.isRequired,
+	relationShip: PropTypes.array.isRequired,
+	reasonList: PropTypes.array.isRequired,
 };
 export default RecipientCard;

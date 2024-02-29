@@ -690,9 +690,9 @@ export interface RequestInvoice {
 		invagency: string;
 		invcashier: number;
 		invpayee: string;
-		invpaymentmode: string;
+		invpaymentmode: string | number;
 		invcurorigin: string;
-		invcurdestination: string;
+		invcurdestination: string | number;
 		invcountryorigin: string | null;
 		invcountrydestination: string | null;
 		invcitydestination: string | null;
@@ -844,7 +844,7 @@ export const getCountries = async (
 	);
 
 export const getStates = async (
-	text: string,
+	text: string | number,
 	resultHandler: (response: StatesResponse) => void,
 	errorHandler: ErrorHandler,
 ) =>
@@ -1075,6 +1075,19 @@ export const getCurrenciesByCountry = async (
 		HttpMethod.GET,
 	);
 
+export const getCurrenciesByCode = async (
+	code: string | null,
+	resultHandler: (response: CurrenciesResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<CurrenciesResponse>(
+		'Catalogs/api/Currency/' + code,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);
+
 export const GetAllPaymentModeByCity = async (
 	city: string | null,
 	resultHandler: (response: PaymentsResponse) => void,
@@ -1082,6 +1095,19 @@ export const GetAllPaymentModeByCity = async (
 ) =>
 	myFetch<PaymentsResponse>(
 		'Payments/api/PaymentMode/GetAllPaymentModeByCity/' + city,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);
+
+export const getPaymentByCode = async (
+	code: string | null,
+	resultHandler: (response: PaymentsResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<PaymentsResponse>(
+		'Payments/api/PaymentMode/' + code,
 		'',
 		resultHandler,
 		errorHandler,

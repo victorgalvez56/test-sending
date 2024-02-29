@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useState } from 'react';
+import { ReactNode, useContext, useState } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import Brand from '../../../layout/Brand/Brand';
@@ -7,26 +7,16 @@ import User from '../../../layout/User/User';
 import {
 	adminPagesMenu,
 	cashierPagesMenu,
-	componentPagesMenu,
 	dashboardPagesMenu,
-	demoPagesMenu,
-	gettingStartedPagesMenu,
-	pageLayoutTypesPagesMenu,
 	supervisorPagesMenu,
 } from '../../../menu';
 import ThemeContext from '../../../contexts/themeContext';
-import Card, { CardBody } from '../../../components/bootstrap/Card';
-import Hand from '../../../assets/img/hand.png';
-import HandWebp from '../../../assets/img/hand.webp';
 import Icon from '../../../components/icon/Icon';
-import Button from '../../../components/bootstrap/Button';
-import useDarkMode from '../../../hooks/useDarkMode';
 import Aside, { AsideBody, AsideFoot, AsideHead } from '../../../layout/Aside/Aside';
-import AuthContext from '../../../contexts/authContext';
 import { getSession } from '../../../services/AuthService';
 
 const DefaultAside = () => {
-	const session = getSession()
+	const session = getSession();
 	const { asideStatus, setAsideStatus } = useContext(ThemeContext);
 
 	const [doc, setDoc] = useState(

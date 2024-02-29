@@ -161,26 +161,6 @@ export interface AgencyStatusResponse extends GeneralResponse {
 export const getToken = async () => ({
 	// Authorization: `Bearer ${await AsyncStorage.getItem('@token')}`
 });
-type UpdateResponseHandler = (response: GeneralResponse) => void;
-
-interface RequestUpdate {
-	identityCode?: number;
-	agency?: string;
-	login?: string;
-	password?: string;
-	secLevel?: string;
-	email?: string;
-	mobile?: string;
-	language?: string;
-	fname?: string;
-	lname?: string;
-	appId?: number;
-	idUsr?: string;
-	usrType?: string;
-	status?: string;
-	name?: string;
-	company?: string;
-}
 
 export const getUsers = async (
 	idUser: number | undefined,

@@ -74,7 +74,7 @@ export const ReceiptPos: React.FC<InvoiceInformationProps> = ({ items }) => {
 	return (
 		<>
 			{items.map((item, index) => (
-				<table style={{ width: '220px', maxWidth: '220px' }}>
+				<table key={index} style={{ width: '220px', maxWidth: '220px' }}>
 					<tbody>
 						<tr>
 							<td

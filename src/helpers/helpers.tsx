@@ -112,24 +112,23 @@ export const showNotificationGlobal = (message: string, type: boolean) => {
 	);
 };
 
-
 export const senderFormattedData = (data: any, searchType: any) => {
-	return data.reduce(
-		(acc: any, obj: any, index: number) => {
-			acc[index] = {
-				value: searchType === 'zipcode' ? obj.zipCode : obj.code,
-				label:
-					searchType === 'sender' ? obj.name :
-						searchType === 'zipcode' ? obj.zipCode
-							: searchType === 'phone1' ? obj.phone1
-								: obj.phone2,
-				isFixed: true,
-				...obj
-			};
-			return acc;
-		},
-		[],
-	);
+	return data.reduce((acc: any, obj: any, index: number) => {
+		acc[index] = {
+			value: searchType === 'zipcode' ? obj.zipCode : obj.code,
+			label:
+				searchType === 'sender'
+					? obj.name
+					: searchType === 'zipcode'
+					? obj.zipCode
+					: searchType === 'phone1'
+					? obj.phone1
+					: obj.phone2,
+			isFixed: true,
+			...obj,
+		};
+		return acc;
+	}, []);
 };
 
 const dot = (_color = '#f8f9fa') => ({

@@ -18,6 +18,8 @@
 	},
 	"plugins": ["import", "prettier", "eslint-comments", "react", "jsx-a11y", "react-hooks"],
 	"rules": {
+		"@typescript-eslint/no-unused-vars": "off",
+		"@typescript-eslint/no-explicit-any": "off",
 		"prettier/prettier": ["warn"],
 		"no-use-before-define": "off",
 		"no-case-declarations": "off",

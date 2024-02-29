@@ -1,7 +1,6 @@
-import React, { FC, useEffect, useState, useContext } from 'react';
+import { FC, useEffect, useState, useContext } from 'react';
 import classNames from 'classnames';
-import moment from 'moment';
-import { FormikHelpers, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import Card, {
 	CardActions,
 	CardBody,
@@ -10,12 +9,6 @@ import Card, {
 	CardTitle,
 } from '../../components/bootstrap/Card';
 import Button from '../../components/bootstrap/Button';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../components/bootstrap/Dropdown';
-import Icon from '../../components/icon/Icon';
 import OffCanvas, {
 	OffCanvasBody,
 	OffCanvasHeader,
@@ -24,7 +17,6 @@ import OffCanvas, {
 import FormGroup from '../../components/bootstrap/forms/FormGroup';
 import Input from '../../components/bootstrap/forms/Input';
 
-import PaginationButtons, { dataPagination, PER_COUNT } from '../../components/PaginationButtons';
 import useDarkMode from '../../hooks/useDarkMode';
 import {
 	Agency,
@@ -36,7 +28,6 @@ import {
 	updateProfile,
 } from '../../services/UsersService';
 import Select from '../../components/bootstrap/forms/Select';
-import { Options } from '../../components/bootstrap/Option';
 import * as Yup from 'yup';
 import AuthContext, { User } from '../../contexts/authContext';
 
@@ -116,8 +107,8 @@ const CommonUpcomingEvents: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		getLanguages(
 			(data) => {
 				const list = data.data.reduce(
-					(acc: AgencyCatalogsList[], languages: Agency, index) => {
-						const { name, code } = languages;
+					(acc: AgencyCatalogsList[], language: Agency, index) => {
+						const { name, code } = language;
 						acc[index] = { value: code, text: name };
 						return acc;
 					},
@@ -156,7 +147,7 @@ const CommonUpcomingEvents: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		onSubmit: (values, { resetForm }) => {
 			updateProfile(
 				values,
-				(data) => {
+				(response) => {
 					getUsers(
 						user.identityCode,
 						(data) => {

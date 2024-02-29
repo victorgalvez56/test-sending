@@ -1,4 +1,4 @@
-import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import FormGroup from '../bootstrap/forms/FormGroup';
@@ -18,8 +18,21 @@ import {
 import { colourStyles, senderFormattedData } from '../../helpers/helpers';
 import Button from '../bootstrap/Button';
 import { useTransactionSweet } from '../../contexts/transactionContext';
+import PropTypes from 'prop-types';
 
-export const SenderCard = ({ ...props }) => {
+interface SenderCardProps {
+	countriesList: any;
+	typeIndentificationList: any;
+	setSelectedTab: any;
+	setTabValidity: any;
+}
+
+export const SenderCard: React.FC<SenderCardProps> = ({
+	countriesList,
+	typeIndentificationList,
+	setSelectedTab,
+	setTabValidity,
+})=> {
 	const [searchSender, setSearchSender] = useState('');
 	const [searchZipCode, setSearchZipCode] = useState('');
 	const [searchPhone1, setSearchPhone1] = useState('');
@@ -127,12 +140,19 @@ export const SenderCard = ({ ...props }) => {
 			city: Yup.string().required('Required'),
 			phone1: Yup.string().required('Required'),
 			birthDate: Yup.date().required('Required'),
+			numberId: Yup.string().required('Required'),
 		}),
 		validateOnChange: true,
 		onSubmit: (values, { resetForm }) => {
 			setSenderInformation(values);
-			props.props.setSelectedTab(2);
-			props.props.setTabValidity([true, true, false]);
+			// setSelectedFNameSender(null);
+			// setSelectedMNameSender(null);
+			// setSelectedLNameSender(null);
+			// setSelectedZipCode(null);
+			// setSelectedPhone1(null);
+			// resetForm();
+			setSelectedTab(2);
+			setTabValidity([true, true, false]);
 		},
 	});
 
@@ -335,7 +355,8 @@ export const SenderCard = ({ ...props }) => {
 
 	const handleKeyDown = (event: any) => {
 		if (event.key === 'Tab') {
-			props.props.setActiveTab('recipient');
+			setSelectedTab(2);
+			setTabValidity([true, true, false]);
 		}
 	};
 
@@ -713,7 +734,7 @@ export const SenderCard = ({ ...props }) => {
 							<Select2
 								ariaLabel='Nationality'
 								placeholder='Choose...'
-								list={props.props.countriesList}
+								list={countriesList}
 								value={formik.values.nationality}
 								onChange={(e: { target: { value: string | any[] } }) => {
 									formik.setFieldValue('nationality', e.target.value);
@@ -737,7 +758,7 @@ export const SenderCard = ({ ...props }) => {
 							<Select2
 								ariaLabel='ID Type'
 								placeholder='Choose...'
-								list={props.props.typeIndentificationList}
+								list={typeIndentificationList}
 								value={formik.values.typeId}
 								onChange={(e: { target: { value: string | any[] } }) => {
 									formik.setFieldValue('typeId', e.target.value);
@@ -920,5 +941,13 @@ export const SenderCard = ({ ...props }) => {
 			</div>
 		</div>
 	);
+};
+
+
+SenderCard.propTypes = {
+	countriesList: PropTypes.array.isRequired,
+	typeIndentificationList: PropTypes.array.isRequired,
+	setSelectedTab: PropTypes.any.isRequired,
+	setTabValidity: PropTypes.any.isRequired,
 };
 export default SenderCard;

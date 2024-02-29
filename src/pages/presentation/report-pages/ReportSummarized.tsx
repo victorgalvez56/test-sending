@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 
 import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
-import { deleteUser, getUsers } from '../../../services/UsersService';
 import Card, {
 	CardBody,
 	CardHeader,
@@ -13,10 +12,10 @@ import Card, {
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import classNames from 'classnames';
-import AuthContext, { User } from '../../../contexts/authContext';
+import AuthContext from '../../../contexts/authContext';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
-import Select, { StylesConfig } from 'react-select';
+import Select from 'react-select';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import * as Yup from 'yup';
 import Label from '../../../components/bootstrap/forms/Label';
@@ -27,8 +26,6 @@ const ReportSummarized = () => {
 	const { user } = useContext(AuthContext);
 
 	const [editOffcanvas, setEditOffcanvas] = useState(false);
-
-
 
 	const formik = useFormik({
 		enableReinitialize: true,
@@ -126,7 +123,9 @@ const ReportSummarized = () => {
 								<Card>
 									<CardHeader className='pb-0'>
 										<CardLabel icon='Person' iconColor='success'>
-										<CardTitle>Summmarized Transaction Report by Country</CardTitle>
+											<CardTitle>
+												Summmarized Transaction Report by Country
+											</CardTitle>
 										</CardLabel>
 									</CardHeader>
 									<CardBody>
@@ -274,35 +273,40 @@ const ReportSummarized = () => {
 												</FormGroup>
 											</div>
 										</div>
-							
-										<div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-										<Button
-											isOutline={!darkModeStatus}
-											color='dark'
-											isLight={darkModeStatus}
-											className={classNames('text-nowrap', {
-												'border-light': !darkModeStatus,
-											})}
-											style={{ marginTop: '50px' }}
-											icon='ArrowBack'
-											onClick={() => {
-												//setUserUpdate(item);
-												setEditOffcanvas(true);
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'center',
+												gap: '20px',
 											}}>
-											Back
-										</Button>
-										<Button
-											isOutline={!darkModeStatus}
-											color='dark'
-											isLight={darkModeStatus}
-											className={classNames('text-nowrap', {
-												'border-light': !darkModeStatus,
-											})}
-											style={{ marginTop: '50px' }}
-											icon='LocalPrintshop'
-											onClick={() => {}}>
-											View Report
-										</Button>
+											<Button
+												isOutline={!darkModeStatus}
+												color='dark'
+												isLight={darkModeStatus}
+												className={classNames('text-nowrap', {
+													'border-light': !darkModeStatus,
+												})}
+												style={{ marginTop: '50px' }}
+												icon='ArrowBack'
+												onClick={() => {
+													//setUserUpdate(item);
+													setEditOffcanvas(true);
+												}}>
+												Back
+											</Button>
+											<Button
+												isOutline={!darkModeStatus}
+												color='dark'
+												isLight={darkModeStatus}
+												className={classNames('text-nowrap', {
+													'border-light': !darkModeStatus,
+												})}
+												style={{ marginTop: '50px' }}
+												icon='LocalPrintshop'
+												onClick={() => {}}>
+												View Report
+											</Button>
 										</div>
 									</CardBody>
 								</Card>

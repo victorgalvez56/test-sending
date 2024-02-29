@@ -1,12 +1,12 @@
 import { createStore, createHook } from 'react-sweet-state';
 import { Sender } from '../services/TransactionsService';
-import { Payees, Recipients } from '../services/NewTransactionService';
+import { Invoices, Recipients } from '../services/NewTransactionService';
 
 const Store = createStore({
 	initialState: {
 		senderInformation: {} as Sender,
 		recipientInformation: {} as Recipients,
-		invoiceInformation: {} as Payees,
+		invoiceInformation: {} as Invoices,
 		invoiceCountry: '' as string,
 		invoiceCity: '' as string,
 	},
@@ -26,7 +26,7 @@ const Store = createStore({
 				});
 			},
 		setInvoiceInformation:
-			(invoiceInformation: Payees) =>
+			(invoiceInformation: Invoices) =>
 			({ setState }) => {
 				setState({
 					invoiceInformation,

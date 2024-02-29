@@ -14,7 +14,15 @@ export const getSession = () => {
 	return JSON.parse(user);
 };
 
-export const setUserSessionData = (user: User, currency: string, preReceiptType: number) => {
+export const setUserSessionData = (
+	user: User,
+	currency: string,
+	preReceiptType: number,
+	agencyCredit: number,
+	agencyBalance: number,
+	agencyExtendeCredit: number,
+	agencyLimit: number,
+) => {
 	let userSession = {
 		isLogged: true,
 		user: {
@@ -24,11 +32,17 @@ export const setUserSessionData = (user: User, currency: string, preReceiptType:
 			name: user.name,
 			login: user.login,
 			secLevel: user.secLevel,
-			company: user.secLevel,
+			company: user.company,
 			identityCode: user.identityCode,
 		},
 		currencyOrigin: currency,
 		preReceiptType: preReceiptType,
+		dataCredit: {
+			agencyCredit: agencyCredit,
+			agencyBalance: agencyBalance,
+			agencyExtendeCredit: agencyExtendeCredit,
+			agencyLimit: agencyLimit,
+		},
 	};
 	localStorage.setItem('userSession', JSON.stringify(userSession));
 };
@@ -90,6 +104,21 @@ export interface LoginResponse extends GeneralResponse {
 		},
 	];
 }
+
+export type CreditResponse = {
+	code: number;
+	success: boolean;
+	message: string;
+	error: string;
+	data: [
+		{
+			agencyCredit: number;
+			agencyBalance: number;
+			agencyExtendeCredit: number;
+			agencyLimit: number;
+		},
+	];
+};
 
 export interface UserResponse extends GeneralResponse {
 	data: User[];
@@ -153,6 +182,19 @@ export const getUser = async (
 ) =>
 	myFetch<UserResponse>(
 		'AgencyUser/api/UserAgency/' + idUser + '/' + idUserConsult,
+		'',
+		resultHandler,
+		errorHandler,
+		HttpMethod.GET,
+	);
+
+export const getCreditInformation = async (
+	codeAgency: string,
+	resultHandler: (response: CreditResponse) => void,
+	errorHandler: ErrorHandler,
+) =>
+	myFetch<CreditResponse>(
+		'AgencyGroups/api/Agency/GetAgencyCredit/' + codeAgency,
 		'',
 		resultHandler,
 		errorHandler,

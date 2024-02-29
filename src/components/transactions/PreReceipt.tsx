@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Recipients, SearchInvoice } from '../../services/NewTransactionService';
+import { Recipients } from '../../services/NewTransactionService';
 import { Sender } from '../../services/TransactionsService';
 
 interface PreReceiptProps {
@@ -24,7 +24,7 @@ interface PreReceiptProps {
 	recipient: Recipients;
 	sender: Sender;
 	agency: string;
-	currencyDest: string | undefined;
+	currencyDest: string | undefined | number;
 }
 
 export const PreReceipt: FC<PreReceiptProps> = ({
@@ -49,11 +49,24 @@ export const PreReceipt: FC<PreReceiptProps> = ({
 									/>
 								</td>
 								<td style={{ width: '50%', textAlign: 'start' }}>
-									<p className='p-style'>Ph: 1-877-268-6458</p>
-									<p className='p-style'>
+									<p
+										style={{
+											margin: 0,
+										}}>
+										Ph: 1-877-268-6458
+									</p>
+									<p
+										style={{
+											margin: 0,
+										}}>
 										70 Grand Avenue, Suite 104, River Edge
 									</p>
-									<p className='p-style'>RIVER EDGE, NJ, 07661</p>
+									<p
+										style={{
+											margin: 0,
+										}}>
+										RIVER EDGE, NJ, 07661
+									</p>
 								</td>
 							</tr>
 						</table>

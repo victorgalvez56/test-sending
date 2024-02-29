@@ -1,11 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
-import Button from '../bootstrap/Button';
-import Page from '../../layout/Page/Page';
-import PageWrapper from '../../layout/PageWrapper/PageWrapper';
+import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import useDarkMode from '../../hooks/useDarkMode';
-import Card, { CardBody, CardHeader } from '../bootstrap/Card';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import InputGroup from '../bootstrap/forms/InputGroup';
@@ -13,8 +8,14 @@ import Select from '../bootstrap/forms/Select';
 import Checks from '../bootstrap/forms/Checks';
 import { Tabs2 } from '../transactions/Tabs';
 import { demoPagesMenu } from '../../menu';
+import { InvoiceReponse } from '../../services/InvoiceServices';
+import PropTypes from 'prop-types';
 
-export const PaymentInformation = ({}) => {
+interface InvoiceInformationProps {
+	items: InvoiceReponse[];
+}
+
+export const PaymentInformation: React.FC<InvoiceInformationProps> = ({ items }) => {
 	const [currencyListOrigin, setCurrencyListOrigin] = useState([]);
 	const [currencyListDes, setCurrencyListDes] = useState([]);
 	const [bankAccounts, setBankAccounts] = useState([]);
@@ -106,86 +107,93 @@ export const PaymentInformation = ({}) => {
 	});
 
 	return (
-		<div className='row mt-20'>
-			<div className='row mt-2'>
-				<div className='col-md-3 m-3'>
-					<FormGroup id='paymentDate' label='Payment Date'>
-						<Input
-							placeholder='Payment Date'
-							autoComplete='family-name'
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.mname2}
-							isValid={formik.isValid}
-							isTouched={formik.touched.mname2}
-							invalidFeedback={formik.errors.mname2}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
+		<>
+			{items.map((item, index) => (
+				<div key={index} className='row mt-20'>
+					<div className='row mt-2'>
+						<div className='col-md-3 m-3'>
+							<FormGroup id='paymentDate' label='Payment Date'>
+								<Input
+									placeholder='Payment Date'
+									autoComplete='family-name'
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
+									value={item.paymentG.date.split('T')[0]}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mname2}
+									invalidFeedback={formik.errors.mname2}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</div>
+						<div className='col-md-3 m-3'>
+							<FormGroup id='receiver' label='Receiver'>
+								<Input
+									placeholder='Receiver'
+									autoComplete='family-name'
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
+									value={item.paymentG.recipient}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mname2}
+									invalidFeedback={formik.errors.mname2}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</div>
+						<div className='col-md-3 m-3'>
+							<FormGroup id='paymentRDate' label='Payment Registered Date'>
+								<Input
+									placeholder='Payment Registered Date'
+									autoComplete='family-name'
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
+									value={item.paymentG.dateActual.split('T')[0]}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mname2}
+									invalidFeedback={formik.errors.mname2}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</div>
+						<div className='row mt-2'></div>
+						<div className='col-md-3 m-3'>
+							<FormGroup id='typeID' label='Type ID'>
+								<Input
+									placeholder='Type ID'
+									autoComplete='family-name'
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
+									value={item.paymentG.recipientIdType}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mname2}
+									invalidFeedback={formik.errors.mname2}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</div>
+						<div className='col-md-3 m-3'>
+							<FormGroup id='identification' label='Identification No'>
+								<Input
+									placeholder='Identification No'
+									autoComplete='family-name'
+									onChange={formik.handleChange}
+									onBlur={formik.handleBlur}
+									value={item.paymentG.recipientIdNumber}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mname2}
+									invalidFeedback={formik.errors.mname2}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</div>
+					</div>
 				</div>
-				<div className='col-md-3 m-3'>
-					<FormGroup id='receiver' label='Receiver'>
-						<Input
-							placeholder='Receiver'
-							autoComplete='family-name'
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.mname2}
-							isValid={formik.isValid}
-							isTouched={formik.touched.mname2}
-							invalidFeedback={formik.errors.mname2}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-				</div>
-				<div className='col-md-3 m-3'>
-					<FormGroup id='paymentRDate' label='Payment Registered Date'>
-						<Input
-							placeholder='Payment Registered Date'
-							autoComplete='family-name'
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.mname2}
-							isValid={formik.isValid}
-							isTouched={formik.touched.mname2}
-							invalidFeedback={formik.errors.mname2}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-				</div>
-				<div className='row mt-2'></div>
-				<div className='col-md-3 m-3'>
-					<FormGroup id='typeID' label='Type ID'>
-						<Input
-							placeholder='Type ID'
-							autoComplete='family-name'
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.mname2}
-							isValid={formik.isValid}
-							isTouched={formik.touched.mname2}
-							invalidFeedback={formik.errors.mname2}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-				</div>
-				<div className='col-md-3 m-3'>
-					<FormGroup id='identification' label='Identification No'>
-						<Input
-							placeholder='Identification No'
-							autoComplete='family-name'
-							onChange={formik.handleChange}
-							onBlur={formik.handleBlur}
-							value={formik.values.mname2}
-							isValid={formik.isValid}
-							isTouched={formik.touched.mname2}
-							invalidFeedback={formik.errors.mname2}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-				</div>
-			</div>
-		</div>
+			))}
+		</>
 	);
 };
+PaymentInformation.propTypes = {
+	items: PropTypes.array.isRequired,
+  }
 export default PaymentInformation;

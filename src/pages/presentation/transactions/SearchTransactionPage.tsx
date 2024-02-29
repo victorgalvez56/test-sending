@@ -1,42 +1,19 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import moment, { Moment } from 'moment';
+import { Moment } from 'moment';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import { adminPagesMenu, demoPagesMenu } from '../../../menu';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../layout/SubHeader/SubHeader';
-import Page from '../../../layout/Page/Page';
-import showNotification from '../../../components/extras/showNotification';
-import Icon from '../../../components/icon/Icon';
+import { demoPagesMenu } from '../../../menu';
 import Card, {
-	CardActions,
 	CardBody,
-	CardFooter,
 	CardHeader,
 	CardLabel,
 	CardSubTitle,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import Button from '../../../components/bootstrap/Button';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../components/bootstrap/Dropdown';
-import useDarkMode from '../../../hooks/useDarkMode';
 import Spinner from '../../../components/bootstrap/Spinner';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
-import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
-import Avatar from '../../../components/Avatar';
-import USERS from '../../../common/data/userDummyData';
-import CommonDesc from '../../../common/other/CommonDesc';
-import Label from '../../../components/bootstrap/forms/Label';
-import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import validate from '../demo-pages/helper/editPagesValidate';
 import Select, { StylesConfig } from 'react-select';
 import {
 	Search,
@@ -45,27 +22,9 @@ import {
 	getAllInvoiceSearch,
 	getSenders,
 } from '../../../services/TransactionsService';
-import { User } from '../../../contexts/authContext';
 import * as Yup from 'yup';
-import LANG from '../../../lang';
-import i18n from '../../../i18n';
-import PaginationButtons, {
-	PER_COUNT,
-	dataPagination,
-} from '../../../components/PaginationButtons';
-import useSortableData from '../../../hooks/useSortableData';
-import data from '../knowledge/helper/dummyKnowledgeData';
-import { ApexOptions } from 'apexcharts';
+import { PER_COUNT, dataPagination } from '../../../components/PaginationButtons';
 import { Link } from 'react-router-dom';
-import classNames from 'classnames';
-import Chart from '../../../components/extras/Chart';
-import { Badge } from '../../../components/icon/material-icons';
-import Modal, {
-	ModalBody,
-	ModalFooter,
-	ModalHeader,
-	ModalTitle,
-} from '../../../components/bootstrap/Modal';
 
 interface ITableRowProps {
 	inv: string;
@@ -149,8 +108,6 @@ const cellStyle = {
 	width: '16.66%',
 };
 const SearchTransactionPage = () => {
-	const { themeStatus } = useDarkMode();
-
 	/**
 	 * Common
 	 */
@@ -181,47 +138,6 @@ const SearchTransactionPage = () => {
 			() => {},
 		);
 	};
-	const [PrintModal, setPrintModal] = useState<boolean>(false);
-	const handlePrint = () => {
-		const content = document.getElementById('modalContent');
-		if (content) {
-			const printWindow = window.open('', '_blank');
-			if (printWindow) {
-				printWindow.document.write(`
-					<!DOCTYPE html>
-					<html lang="en">
-					<head>
-						<meta charset="UTF-8">
-						<meta name="viewport" content="width=device-width, initial-scale=1.0">
-						<title>Print</title>
-						<style>
-							@media print {
-								body {
-									margin: 0;
-									padding: 0;
-								}
-								.print-content {
-									width: 100mm;
-									height: 100mm;
-									position: absolute;
-									top: 10mm; 
-									left: 10mm;
-								}
-							}
-						</style>
-					</head>
-					<body>
-						<div class="print-content">
-							${content.innerHTML}
-						</div>
-					</body>
-					</html>
-				`);
-				printWindow.document.close();
-				printWindow.print();
-			}
-		}
-	};
 
 	const formik = useFormik<Search>({
 		enableReinitialize: true,
@@ -230,8 +146,8 @@ const SearchTransactionPage = () => {
 			invNo: '',
 			payeeBranch: '',
 			folio: '',
-			fecInicio: "01-23-2023",
-			fecFin: "02-23-2023",
+			fecInicio: '01-23-2023',
+			fecFin: '02-23-2023',
 			status: '',
 			senderG: {
 				fName: '',
@@ -254,12 +170,22 @@ const SearchTransactionPage = () => {
 			// password: Yup.string().required('Required'),
 		}),
 		validateOnChange: false,
-		onSubmit: (values, { resetForm }) => {},
+		onSubmit: (values, { resetForm }) => {
+			getAllInvoiceSearch(
+				values,
+				(response: any) => {
+					console.warn(response);
+					setInvoicesList(response.data);
+				},
+				() => {},
+			);
+		},
 	});
-
 	useEffect(() => {
-		handleGetAllInvoiceSearch();
-	}, []);
+		return () => {
+			handleGetAllInvoiceSearch();
+		};
+	},[] );
 
 	const handleGetAllInvoiceSearch = () => {
 		getAllInvoiceSearch(
@@ -268,7 +194,7 @@ const SearchTransactionPage = () => {
 				console.warn(response);
 				setInvoicesList(response.data);
 			},
-			() => { },
+			() => {},
 		);
 	};
 	const dot = (color = '#f8f9fa') => ({
@@ -294,24 +220,8 @@ const SearchTransactionPage = () => {
 		placeholder: (styles) => ({ ...styles, paddingRight: '1rem', ...dot() }),
 	};
 
-	const TOP_SELLER_FILTER = {
-		DAY: 'day',
-		WEEK: 'week',
-		MONTH: 'month',
-	};
-	const [topSellerFilter, setTopSellerFilter] = useState(TOP_SELLER_FILTER.DAY);
-	const filteredData = data
-		.filter(
-			(f: any) =>
-				(topSellerFilter === TOP_SELLER_FILTER.DAY && f.id < 6) ||
-				(topSellerFilter === TOP_SELLER_FILTER.WEEK && f.name.includes('c')) ||
-				(topSellerFilter === TOP_SELLER_FILTER.MONTH && f.price > 13),
-		)
-		.filter((c: any, index: any) => index < 5);
-
 	const [currentPage, setCurrentPage] = useState(1);
 	const [perPage, setPerPage] = useState(PER_COUNT['3']);
-	const { items, requestSort, getClassNamesFor } = useSortableData(filteredData);
 	return (
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editModern.text}>
 			<div className='row h-100'>
@@ -324,93 +234,76 @@ const SearchTransactionPage = () => {
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='fname' label='First Name'>
+									<FormGroup id='fName' label='First Name'>
 										<Input
-											name='fName'
+											name='senderG.fName'
 											placeholder='First Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.senderG.fName}
-											isValid={formik.isValid}
-											isTouched={formik.touched.senderG && formik.touched.senderG.fName}
-											invalidFeedback={formik.errors.senderG && formik.errors.senderG.fName}
-											validFeedback='Looks good!'
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-6'>
-									<FormGroup id='mname' label='Middle Name'>
+									<FormGroup id='midName' label='Middle Name'>
 										<Input
-											name='midName'
+											name='senderG.midName'
 											placeholder='Middle Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.senderG.midName}
-											isValid={formik.isValid}
-											isTouched={formik.touched.senderG && formik.touched.senderG.midName}
-											invalidFeedback={formik.errors.senderG && formik.errors.senderG.midName}
-											validFeedback='Looks good!'
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='lname' label='Last Name'>
+									<FormGroup id='lName' label='Last Name'>
 										<Input
+											name='senderG.lName'
 											placeholder='Last Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.senderG.lName}
-											isValid={formik.isValid}
-											isTouched={formik.touched.senderG && formik.touched.senderG.lName}
-											invalidFeedback={formik.errors.senderG && formik.errors.senderG.lName}
-											validFeedback='Looks good!'
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-6'>
-									<FormGroup id='mname' label='Maiden Name'>
+									<FormGroup id='slName' label='Maiden Name'>
 										<Input
+											name='senderG.slName'
 											placeholder='Maiden Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											// value={formik.values.mname2}
-											isValid={formik.isValid}
-											// isTouched={formik.touched.mname2}
-											// invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.senderG.slName}
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							{/* <div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='phone1' label='Phone'>
+									<FormGroup id='phone' label='Phone'>
 										<Input
+											name='senderG.phone'
 											placeholder='Phone'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.senderG.phone}
 										/>
 									</FormGroup>
 								</div>
-							</div> */}
+							</div>
 						</CardBody>
 					</Card>
 				</div>
-				{/* <div className='col-md-6'>
+				<div className='col-md-6'>
 					<Card>
 						<CardHeader className='pb-0'>
 							<CardLabel icon='Person' iconColor='success'>
@@ -419,90 +312,75 @@ const SearchTransactionPage = () => {
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='fname' label='First Name'>
+									<FormGroup id='fName' label='First Name'>
 										<Input
+											name='recipientG.fName'
 											placeholder='First Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.recipientG.fName}
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-6'>
-									<FormGroup id='mname' label='Middle Name'>
+									<FormGroup id='midName' label='Middle Name'>
 										<Input
+											name='recipientG.midName'
 											placeholder='Middle Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.recipientG.midName}
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='lname' label='Last Name'>
+									<FormGroup id='lName' label='Last Name'>
 										<Input
+											name='lName'
 											placeholder='Last Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.recipientG.lName}
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-6'>
-									<FormGroup id='mname' label='Maiden Name'>
+									<FormGroup id='slName' label='Maiden Name'>
 										<Input
+											name='slName'
 											placeholder='Maiden Name'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.recipientG.slName}
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-6'>
-									<FormGroup id='phone1' label='Phone'>
+									<FormGroup id='phone' label='Phone'>
 										<Input
+											name=''
 											placeholder='Phone'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.recipientG.phone}
 										/>
 									</FormGroup>
 								</div>
 							</div>
 						</CardBody>
 					</Card>
-				</div> */}
+				</div>
 				<div className='col-md-12'>
 					<Card>
 						<CardHeader className='pb-0'>
@@ -512,49 +390,28 @@ const SearchTransactionPage = () => {
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
-							{/* <div className='row mt-2'>
-								<div className='col-md-3'>
-									<FormGroup id='fname' label='Ref No'>
-										<Input
-											placeholder='Ref No'
-											autoComplete='family-name'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
-										/>
-									</FormGroup>
-								</div>
+							<div className='row mt-3'>
 								<div className='col-md-3'>
 									<FormGroup id='mname' label='Payee'>
 										<Input
+											name='payee'
 											placeholder='Payee'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.payee}
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-3'>
 									<FormGroup id='fname' label='Inv No.'>
 										<Input
+											name='invNo'
 											placeholder='Inv No.'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.invNo}
 										/>
 									</FormGroup>
 								</div>
@@ -565,16 +422,12 @@ const SearchTransactionPage = () => {
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											// value={formik.values.mname2}
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-3'>
 									<FormGroup id='fname' label='Payee Branch'>
 										<Input
@@ -582,61 +435,53 @@ const SearchTransactionPage = () => {
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.payeeBranch}
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-md-3'>
 									<FormGroup id='mname' label='Folio/pin'>
 										<Input
+											name='folio'
 											placeholder='Folio/pin'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.folio}
 										/>
 									</FormGroup>
 								</div>
+
 								<div className='col-md-3'>
 									<FormGroup id='fname' label='Dates'>
 										<Input
+											name='fecInicio'
+											type='date'
 											placeholder='Dates'
 											autoComplete='family-name'
+											value={'2018-07-22'}
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											// value={formik.values.fecInicio}
 										/>
 									</FormGroup>
 								</div>
+
 								<div className='col-md-3'>
 									<FormGroup id='mname' label='to'>
 										<Input
+											name='fecFin'
+											type='date'
 											placeholder='to'
 											autoComplete='family-name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.mname2}
-											isValid={formik.isValid}
-											isTouched={formik.touched.mname2}
-											invalidFeedback={formik.errors.mname2}
-											validFeedback='Looks good!'
+											value={formik.values.fecFin}
 										/>
 									</FormGroup>
 								</div>
 							</div>
-							<div className='row mt-2'>
+							<div className='row mt-3'>
 								<div className='col-md-3'>
 									<FormGroup id='fname' label='Status'>
 										<Select
@@ -653,39 +498,11 @@ const SearchTransactionPage = () => {
 										/>
 									</FormGroup>
 								</div>
-							</div> */}
-
-						</CardBody>
-					</Card>
-					<div className='row'>
-						<div className='col-12'>
-							<Card>
-								<CardBody>
+							</div>
+							<div className='row'>
+								<div className='col-12'>
 									<div className='row align-items-center'>
-										<div className='col'>
-											{lastSave ? (
-												<>
-													<Icon
-														icon='DoneAll'
-														size='lg'
-														className='me-2 text-muted'
-													/>
-													<span className='me-2 text-muted'>Last Saved</span>
-													<strong>
-														{moment(lastSave).format('MMMM Do, YYYY - HH:mm')}
-													</strong>
-												</>
-											) : (
-												<>
-													<Icon
-														icon='Warning'
-														size='lg'
-														className='me-2 text-warning'
-													/>
-													<span className='text-warning'>Not saved yet</span>
-												</>
-											)}
-										</div>
+										<div className='col'></div>
 										<div className='col-auto'>
 											<div className='row g-1'>
 												<div className='col-auto'>
@@ -702,96 +519,22 @@ const SearchTransactionPage = () => {
 															: (lastSave && 'Save') || 'Publish'}
 													</Button>
 												</div>
-												<div className='col-auto'>
-													<Dropdown direction='up'>
-														<DropdownToggle hasIcon={false}>
-															<Button color={themeStatus} icon='MoreVert' />
-														</DropdownToggle>
-														<DropdownMenu isAlignmentEnd>
-															<DropdownItem>
-																<Button
-																	className='me-3'
-																	icon='Save'
-																	isLight
-																	isDisable={isLoading}
-																	onClick={formik.resetForm}>
-																	Reset
-																</Button>
-															</DropdownItem>
-														</DropdownMenu>
-													</Dropdown>
-												</div>
 											</div>
 										</div>
 									</div>
-								</CardBody>
-							</Card>
-						</div>
-					</div>
+								</div>
+							</div>
+						</CardBody>
+					</Card>
 				</div>
 
-				<Card stretch>
+				<Card>
 					<CardHeader>
 						<CardLabel icon='ViewList' iconColor='info'>
 							<CardTitle tag='h4' className='h5'>
 								Transactions List
 							</CardTitle>
 						</CardLabel>
-						<CardActions>
-							<Dropdown isButtonGroup>
-								<Button color='success' isLight icon='WaterfallChart'>
-									{(topSellerFilter === TOP_SELLER_FILTER.DAY &&
-										moment().format('MMM Do')) ||
-										(topSellerFilter === TOP_SELLER_FILTER.WEEK &&
-											`${moment()
-												.startOf('week')
-												.format('MMM Do')} - ${moment()
-												.endOf('week')
-												.format('MMM Do')}`) ||
-										(topSellerFilter === TOP_SELLER_FILTER.MONTH &&
-											moment().format('MMM YYYY'))}
-								</Button>
-								<DropdownToggle>
-									<Button color='success' isLight isVisuallyHidden />
-								</DropdownToggle>
-								<DropdownMenu isAlignmentEnd>
-									<DropdownItem>
-										<Button
-											onClick={() =>
-												setTopSellerFilter(TOP_SELLER_FILTER.DAY)
-											}>
-											Last Day
-										</Button>
-									</DropdownItem>
-									<DropdownItem>
-										<Button
-											onClick={() =>
-												setTopSellerFilter(TOP_SELLER_FILTER.WEEK)
-											}>
-											Last Week
-										</Button>
-									</DropdownItem>
-									<DropdownItem>
-										<Button
-											onClick={() =>
-												setTopSellerFilter(TOP_SELLER_FILTER.MONTH)
-											}>
-											Last Month
-										</Button>
-									</DropdownItem>
-								</DropdownMenu>
-							</Dropdown>
-							<Button
-								color='info'
-								icon='CloudDownload'
-								isLight
-								tag='a'
-								to='/somefile.txt'
-								target='_blank'
-								download>
-								Export
-							</Button>
-						</CardActions>
 					</CardHeader>
 					<CardBody className='table-responsive'>
 						<table className='table table-modern table-hover'>
@@ -828,14 +571,14 @@ const SearchTransactionPage = () => {
 							</tbody>
 						</table>
 					</CardBody>
-					<PaginationButtons
+					{/* <PaginationButtons
 						data={items}
 						label='items'
 						setCurrentPage={setCurrentPage}
 						currentPage={currentPage}
 						perPage={perPage}
 						setPerPage={setPerPage}
-					/>
+					/> */}
 				</Card>
 			</div>
 		</PageWrapper>

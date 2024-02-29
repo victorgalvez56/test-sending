@@ -1,12 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useContext } from 'react';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
-import { deleteUser, getUsers } from '../../../services/UsersService';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
@@ -16,7 +14,7 @@ import * as Yup from 'yup';
 import Label from '../../../components/bootstrap/forms/Label';
 import { useFormik } from 'formik';
 import classNames from 'classnames';
-import AuthContext, { User } from '../../../contexts/authContext';
+import AuthContext from '../../../contexts/authContext';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
@@ -161,7 +159,10 @@ const ReportSender = () => {
 										</div>
 										<div className='row mt-3'>
 											<div className='col-md-3'>
-												<FormGroup isFloating id='fname' label='Type the senders Info:'>
+												<FormGroup
+													isFloating
+													id='fname'
+													label='Type the senders Info:'>
 													<Input
 														autoComplete='family-name'
 														onChange={formik.handleChange}
@@ -191,7 +192,10 @@ const ReportSender = () => {
 										</div>
 										<div className='row mt-3'>
 											<div className='col-md-4'>
-												<FormGroup isFloating id='fname' label='Type the Recipient Name:'>
+												<FormGroup
+													isFloating
+													id='fname'
+													label='Type the Recipient Name:'>
 													<Input
 														autoComplete='family-name'
 														onChange={formik.handleChange}

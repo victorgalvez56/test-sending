@@ -13,24 +13,48 @@ import {
 	Currencies,
 	Fee,
 	GetAllPaymentModeByCity,
+	GetBranchbyInvoice,
 	GetPayeeBranch,
 	GetRate,
 	Getfee,
 	Invoice,
+	Payees,
 	Payments,
+	Reasons,
+	SearchInvoice,
+	getCurrenciesByCode,
 	getCurrenciesByCountry,
+	getInvoiceByCode,
+	getPaymentByCode,
 } from '../../services/NewTransactionService';
 import { useEffect, useState } from 'react';
-import { GetBranchbyInvoice, Payees } from '../../services/NewTransactionService';
 import { getSession } from '../../services/AuthService';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
 import { useTransactionSweet } from '../../contexts/transactionContext';
 import { PreReceipt } from './PreReceipt';
 import { PosPreReceipt } from './PosPreReceipt';
-import Card, { CardBody } from '../bootstrap/Card';
-import Checks from '../bootstrap/forms/Checks';
+import Card, {
+	CardActions,
+	CardBody,
+	CardHeader,
+	CardLabel,
+	CardSubTitle,
+} from '../bootstrap/Card';
+import ReceiptOnePage from './ReceiptOnePage';
+import PropTypes from 'prop-types';
+interface InvoiceCardProps {
+	bankAccountingTypeList: ListsSelect[];
+	serviceList: ListsSelect[];
+	setSelectedTab: any;
+	setTabValidity: any;
+}
 
-export const InvoiceCard = ({ ...props }) => {
+export const InvoiceCard: React.FC<InvoiceCardProps> = ({
+	bankAccountingTypeList,
+	serviceList,
+	setSelectedTab,
+	setTabValidity,
+}) => {
 	const userSession = getSession();
 	const [paymentList, setPaymentList] = useState<ListsSelect[]>([]);
 	const [currenciesList, setCurrenciesList] = useState<ListsSelect[]>([]);
@@ -41,15 +65,26 @@ export const InvoiceCard = ({ ...props }) => {
 	const [isOpenPayee, setIsOpenPayee] = useState<boolean>(false);
 	const [isOpenAlert, setIsOpenAlert] = useState<boolean>(false);
 	const [isOpenInvoice, setIsOpenInvoice] = useState<boolean>(false);
-	const [selectedCurrency, setSelectedCurrency] = useState<string>();
-	const [selectedPayment, setSelectedPayment] = useState<string>();
+	const [isOpenHelp, setIsOpenHelp] = useState<boolean>(false);
+	const [isOpenReceipt, setIsOpenReceipt] = useState<boolean>(false);
+	const [isPrint, setIsPrint] = useState<boolean>(false);
+	const [selectedCurrency, setSelectedCurrency] = useState<ListsSelect>();
+	const [selectedPayment, setSelectedPayment] = useState<ListsSelect>();
 	const [selectedPayee, setSelectedPayee] = useState<undefined | string>('');
 	const [selectedRate, setSelectedRate] = useState<undefined | string>('');
 	const [selectedBranch, setSelectedBranch] = useState<undefined | string>('');
 	const [focus, setFocus] = useState<boolean>(false);
+	const [invoiceInfo, setinvoiceInfo] = useState<SearchInvoice>();
 	const [preReceiptType, setPreReceiptType] = useState<number>(0);
-	const [{ invoiceCountry, invoiceCity, recipientInformation, senderInformation }] =
-		useTransactionSweet();
+	const [
+		{
+			invoiceCountry,
+			invoiceCity,
+			recipientInformation,
+			senderInformation,
+			invoiceInformation,
+		},
+	] = useTransactionSweet();
 
 	useEffect(() => {
 		setPreReceiptType(userSession.preReceiptType);
@@ -96,152 +131,77 @@ export const InvoiceCard = ({ ...props }) => {
 		}
 	}, [invoiceCountry, invoiceCity]);
 
+	useEffect(() => {
+		if (invoiceInformation) {
+			setSelectedBranch(invoiceInformation.invPayee);
+			getCurrenciesByCode(
+				invoiceInformation.invCurDestination,
+				(response) => {
+					setSelectedCurrency({
+						value: response.data[0].code,
+						label: response.data[0].name,
+						isFixed: true,
+					});
+				},
+				() => {},
+			);
+			getPaymentByCode(
+				invoiceInformation.invPaymentMode,
+				(response) => {
+					setSelectedPayment({
+						value: response.data[0].code,
+						label: response.data[0].name,
+						isFixed: true,
+					});
+				},
+				() => {},
+			);
+			GetRate(
+				{
+					CodeCountryOrigin: localStorage.getItem('countryOrigin'),
+					CodeCurrencyOrigin: userSession.currencyOrigin,
+					CodeCountryDestination: localStorage.getItem('countryRecipient'),
+					CodeCurrencyDestination: invoiceInformation.invCurDestination,
+					CodeAgency: userSession.user.agency,
+					CodePayee: invoiceInformation.invPayee,
+					CodeStateOrigin: localStorage.getItem('stateOrigin'),
+					CodeRateType: formik.values.service,
+					CodePMo: invoiceInformation.invPaymentMode,
+				},
+				(res) => {
+					setSelectedRate(res.data[0].rate);
+					formik.setFieldValue('exchangeRate', res.data[0].rate);
+				},
+				() => {},
+			);
+		}
+	}, [invoiceInformation]);
+
 	const formik = useFormik({
 		enableReinitialize: true,
 		initialValues: {
-			currency: '',
+			currency: invoiceInformation ? invoiceInformation.invCurDestination : '',
 			service: 'E',
 			netAmount: 0,
 			exchangeRate: '0',
-			paymentMode: '',
+			paymentMode: invoiceInformation ? invoiceInformation.invPaymentMode : '',
 			fees: '',
 			totalToPay: '',
-			bankName: '',
+			bankName: invoiceInformation ? invoiceInformation.invBankName : '',
 			handling: 0,
 			forexProfit: '',
-			bankBranch: '',
+			bankBranch: invoiceInformation ? invoiceInformation.invBankBranch : '',
 			total: '',
 			folioPinNumber: '',
-			bankAccountNumber: '',
-			bankAccountType: '',
+			bankAccountNumber: invoiceInformation ? invoiceInformation.invBankAccountNumber : '',
+			bankAccountType: invoiceInformation ? invoiceInformation.invBankAccountType : '',
 			agentFee: '',
 		},
 		validationSchema: Yup.object({
 			netAmount: Yup.number().min(1, 'Too Short!').required('Required'),
 		}),
 		onSubmit: (values, { resetForm }) => {
-			console.warn('SENDER::::', senderInformation);
-			console.warn('RECIPIENT::::', recipientInformation);
-			console.warn('INVOICE::::', values);
 			setIsOpenInvoice(true);
-			// Invoice(
-			// 	{
-			// 		autogeninvno: 1,
-			// 		invoiceg: {
-			// 			invcode: 0,
-			// 			invagency: userSession.user.agency,
-			// 			invcashier: userSession.user.identityCode,
-			// 			invpayee: selectedBranch ? selectedBranch : '',
-			// 			invpaymentmode: selectedPayment ? selectedPayment : '',
-			// 			invcurorigin: userSession.currencyOrigin,
-			// 			invcurdestination: selectedCurrency ? selectedCurrency : '',
-			// 			invcountryorigin: localStorage.getItem('countryOrigin'),
-			// 			invcountrydestination: localStorage.getItem('countryRecipient'),
-			// 			invcitydestination: localStorage.getItem('cityRecipient'),
-			// 			invamount: Number(values.netAmount),
-			// 			invfee: Number(values.fees),
-			// 			invhandling: values.handling,
-			// 			invexchangerate: Number(values.exchangeRate),
-			// 			invtotalreceived: Number(values.totalToPay),
-			// 			invfixcompany: Number(feeList?.fixCompany),
-			// 			invfixcustomer: Number(feeList?.fixCustomer),
-			// 			invperccompany: Number(feeList?.percCompany),
-			// 			invperccustomer: Number(feeList?.percCustomer),
-			// 			invmincompany: Number(feeList?.minCompany),
-			// 			invmincustomer: Number(feeList?.minCustomer),
-			// 			invbankname: values.bankName,
-			// 			invbankbranch: values.bankBranch,
-			// 			invbankaccounttype: values.bankAccountType,
-			// 			invbankaccountnumber: values.bankAccountNumber,
-			// 			invtotal: Number(values.total),
-			// 			invmessage: '',
-			// 			invbankcode: '',
-			// 			invbankbranchcode: '',
-			// 			invrateservicetype: values.service,
-			// 			invagencysettlementrate: 0,
-			// 			invreason: '',
-			// 			invrequiredbsa: true,
-			// 			invcountryorigination: localStorage.getItem('countryOrigin'),
-			// 			invonlinetype: 'W',
-			// 			invincomingchannel: 'A',
-			// 			inviD1: '',
-			// 			invfolio: '1234567890',
-			// 		},
-			// 		senderg: {
-			// 			sencode: senderInformation.code,
-			// 			senfname: senderInformation.fname,
-			// 			senmname: senderInformation.mname,
-			// 			senlname: senderInformation.lname,
-			// 			sensname: senderInformation.slname2,
-			// 			senaddress: senderInformation.address,
-			// 			senphonE1: senderInformation.phone1,
-			// 			senconfirmemail: senderInformation.confirmEmail,
-			// 			senemail: senderInformation.email,
-			// 			senzipcode: senderInformation.zipcode,
-			// 			sencountry: senderInformation.codeCountry,
-			// 			senstate: senderInformation.codeState,
-			// 			sencityname: senderInformation.cityname,
-			// 			sennationality: senderInformation.nationality,
-			// 			senbirthdate: new Date(senderInformation.birthDate)
-			// 				.toISOString()
-			// 				.slice(0, 10),
-			// 			senexpdate: new Date(senderInformation.expDateId)
-			// 				.toISOString()
-			// 				.slice(0, 10),
-			// 			sentypeid: senderInformation.typeId,
-			// 			sennumberid: senderInformation.numberId,
-			// 			sencountryres: senderInformation.countryResidence,
-			// 			senutilitybill: senderInformation.utilityBill,
-			// 			senstatename: senderInformation.stateName,
-			// 			senoccupation: senderInformation.occupation,
-			// 			senidissuedate: new Date().toISOString().slice(0, 10),
-			// 			senissueby: senderInformation.placeIssueId,
-			// 			senphotoidpath: '',
-			// 			senkeygen: '',
-			// 			senidentityid: '0',
-			// 			senallowsms: senderInformation.allowSms,
-			// 			sentypeiD2: senderInformation.typeId2,
-			// 			sennumberiD2: senderInformation.numberId2,
-			// 			senemployername: senderInformation.employerName,
-			// 			senemployeraddress: senderInformation.employerAddress,
-			// 			senemployerphonE1: senderInformation.employerPhone1,
-			// 			senpersonofcontact: senderInformation.personOfContact,
-			// 		},
-			// 		recipientg: {
-			// 			reccode: recipientInformation.code,
-			// 			recfname: recipientInformation.fname,
-			// 			recmname: recipientInformation.mname,
-			// 			reclname: recipientInformation.lname,
-			// 			recsname: recipientInformation.slname2,
-			// 			recaddress: recipientInformation.address,
-			// 			recphonE1: recipientInformation.phone1,
-			// 			recconfirmemail: recipientInformation.confirmEmail,
-			// 			recemail: recipientInformation.email,
-			// 			reczipcode: recipientInformation.zipcode,
-			// 			reccountry: recipientInformation.codeCountry,
-			// 			recstate: recipientInformation.codeState,
-			// 			reccity: recipientInformation.codeCity,
-			// 			recidnumber: recipientInformation.identityCode,
-			// 			recsendsms: recipientInformation.sendSms,
-			// 			recrelationship: recipientInformation.relationship,
-			// 			recbirthdate: recipientInformation.birthDate,
-			// 			recnationality: recipientInformation.nationality,
-			// 			rectypeid: recipientInformation.typeId,
-			// 			reccityname: recipientInformation.city,
-			// 		},
-			// 	},
-			// 	(response) => {
-			// 		getInvoiceByCode(
-			// 			response.data[0].code,
-			// 			(res) => {
-			// 				setSearchList(res.data[0]);
-			// 				console.error('SEARCH INVOICE', res);
-			// 			},
-			// 			() => {},
-			// 		);
-			// 	},
-			// 	(error) => {},
-			// );
 		},
 	});
 
@@ -255,7 +215,11 @@ export const InvoiceCard = ({ ...props }) => {
 					);
 					if (findCurrency) {
 						formik.setFieldValue('currency', findCurrency.label);
-						setSelectedCurrency(findCurrency.value.toString());
+						setSelectedCurrency({
+							value: findCurrency.value.toString(),
+							label: findCurrency.label,
+							isFixed: true,
+						});
 					}
 				} else {
 					formik.setFieldValue('currency', '');
@@ -263,7 +227,7 @@ export const InvoiceCard = ({ ...props }) => {
 				break;
 			case 'state':
 				if (selectedOption) {
-					let findService = props.props.serviceList.find(
+					let findService = serviceList.find(
 						(service: ListsSelect) => service.value == selectedOption.value,
 					);
 					if (findService) {
@@ -280,12 +244,16 @@ export const InvoiceCard = ({ ...props }) => {
 					);
 					if (findPayment) {
 						formik.setFieldValue('paymentMode', findPayment.value);
-						setSelectedPayment(findPayment.value.toString());
+						setSelectedPayment({
+							value: findPayment.value.toString(),
+							label: findPayment.label,
+							isFixed: true,
+						});
 						var arr: Payees[] = [];
 						GetBranchbyInvoice(
 							{
 								pmCode: findPayment.value,
-								CodeCur: selectedCurrency,
+								CodeCur: selectedCurrency?.value,
 								codeCountry: localStorage.getItem('countryRecipient'),
 								codeCity: localStorage.getItem('cityRecipient'),
 								codeCompany:
@@ -303,7 +271,7 @@ export const InvoiceCard = ({ ...props }) => {
 											CodeCurrencyOrigin: userSession.currencyOrigin,
 											CodeCountryDestination:
 												localStorage.getItem('countryRecipient'),
-											CodeCurrencyDestination: selectedCurrency,
+											CodeCurrencyDestination: selectedCurrency?.value,
 											CodeAgency: userSession.user.agency,
 											CodePayee: item.codeBranch,
 											CodeStateOrigin: localStorage.getItem('stateOrigin'),
@@ -342,8 +310,8 @@ export const InvoiceCard = ({ ...props }) => {
 		setSelectedRate(payee.rate);
 		GetPayeeBranch(
 			{
-				pmoCode: selectedPayment,
-				CodeCur: selectedCurrency,
+				pmoCode: selectedPayment?.value,
+				CodeCur: selectedCurrency?.value,
 				codeCountry: localStorage.getItem('countryRecipient'),
 				codeCity: localStorage.getItem('cityRecipient'),
 				codeCompany: userSession.user.company === 'A' ? 'ECH' : userSession.user.company,
@@ -371,11 +339,11 @@ export const InvoiceCard = ({ ...props }) => {
 				CodeCountryOrigin: localStorage.getItem('countryOrigin'),
 				CodeCurrencyOrigin: userSession.currencyOrigin,
 				CodeCountryDestination: localStorage.getItem('countryRecipient'),
-				CodeCurrencyDestination: selectedCurrency,
+				CodeCurrencyDestination: selectedCurrency?.value,
 				CodeAgency: userSession.user.agency,
 				CodePayee: selectedBranch,
 				CodeService: formik.values.service,
-				CodePMo: selectedPayment,
+				CodePMo: selectedPayment?.value,
 				CodeState: localStorage.getItem('stateOrigin'),
 			},
 			(response) => {
@@ -443,6 +411,128 @@ export const InvoiceCard = ({ ...props }) => {
 				printWindow.print();
 			}
 		}
+		setIsPrint(true);
+	};
+
+	const save = () => {
+		Invoice(
+			{
+				autogeninvno: 1,
+				invoiceg: {
+					invcode: 0,
+					invagency: userSession.user.agency,
+					invcashier: userSession.user.identityCode,
+					invpayee: selectedBranch ? selectedBranch : '',
+					invpaymentmode: selectedPayment ? selectedPayment.value : '',
+					invcurorigin: userSession.currencyOrigin,
+					invcurdestination: selectedCurrency ? selectedCurrency.value : '',
+					invcountryorigin: localStorage.getItem('countryOrigin'),
+					invcountrydestination: localStorage.getItem('countryRecipient'),
+					invcitydestination: localStorage.getItem('cityRecipient'),
+					invamount: Number(formik.values.netAmount),
+					invfee: Number(formik.values.fees),
+					invhandling: formik.values.handling,
+					invexchangerate: Number(formik.values.exchangeRate),
+					invtotalreceived: Number(formik.values.totalToPay),
+					invfixcompany: Number(feeList?.fixCompany),
+					invfixcustomer: Number(feeList?.fixCustomer),
+					invperccompany: Number(feeList?.percCompany),
+					invperccustomer: Number(feeList?.percCustomer),
+					invmincompany: Number(feeList?.minCompany),
+					invmincustomer: Number(feeList?.minCustomer),
+					invbankname: formik.values.bankName,
+					invbankbranch: formik.values.bankBranch,
+					invbankaccounttype: formik.values.bankAccountType,
+					invbankaccountnumber: formik.values.bankAccountNumber,
+					invtotal: Number(formik.values.total),
+					invmessage: '',
+					invbankcode: '',
+					invbankbranchcode: '',
+					invrateservicetype: formik.values.service,
+					invagencysettlementrate: 0,
+					invreason: '',
+					invrequiredbsa: true,
+					invcountryorigination: localStorage.getItem('countryOrigin'),
+					invonlinetype: 'W',
+					invincomingchannel: 'A',
+					inviD1: '',
+					invfolio: '1234567890',
+				},
+				senderg: {
+					sencode: senderInformation.code,
+					senfname: senderInformation.fname,
+					senmname: senderInformation.mname,
+					senlname: senderInformation.lname,
+					sensname: senderInformation.slname2,
+					senaddress: senderInformation.address,
+					senphonE1: senderInformation.phone1,
+					senconfirmemail: senderInformation.confirmEmail,
+					senemail: senderInformation.email,
+					senzipcode: senderInformation.zipcode,
+					sencountry: senderInformation.codeCountry,
+					senstate: senderInformation.codeState,
+					sencityname: senderInformation.cityname,
+					sennationality: senderInformation.nationality,
+					senbirthdate: new Date(senderInformation.birthDate).toISOString().slice(0, 10),
+					senexpdate: new Date(senderInformation.expDateId).toISOString().slice(0, 10),
+					sentypeid: senderInformation.typeId,
+					sennumberid: senderInformation.numberId,
+					sencountryres: senderInformation.countryResidence,
+					senutilitybill: senderInformation.utilityBill,
+					senstatename: senderInformation.stateName,
+					senoccupation: senderInformation.occupation,
+					senidissuedate: new Date().toISOString().slice(0, 10),
+					senissueby: senderInformation.placeIssueId,
+					senphotoidpath: '',
+					senkeygen: '',
+					senidentityid: '0',
+					senallowsms: senderInformation.allowSms,
+					sentypeiD2: senderInformation.typeId2,
+					sennumberiD2: senderInformation.numberId2,
+					senemployername: senderInformation.employerName,
+					senemployeraddress: senderInformation.employerAddress,
+					senemployerphonE1: senderInformation.employerPhone1,
+					senpersonofcontact: senderInformation.personOfContact,
+				},
+				recipientg: {
+					reccode: recipientInformation.code,
+					recfname: recipientInformation.fname,
+					recmname: recipientInformation.mname,
+					reclname: recipientInformation.lname,
+					recsname: recipientInformation.slname2,
+					recaddress: recipientInformation.address,
+					recphonE1: recipientInformation.phone1,
+					recconfirmemail: recipientInformation.confirmEmail,
+					recemail: recipientInformation.email,
+					reczipcode: recipientInformation.zipcode,
+					reccountry: recipientInformation.codeCountry,
+					recstate: recipientInformation.codeState,
+					reccity: recipientInformation.codeCity,
+					recidnumber: recipientInformation.identityCode,
+					recsendsms: recipientInformation.sendSms,
+					recrelationship: recipientInformation.relationship,
+					recbirthdate: recipientInformation.birthDate,
+					recnationality: recipientInformation.nationality,
+					rectypeid: recipientInformation.typeId,
+					reccityname: recipientInformation.city,
+				},
+			},
+			(response) => {
+				setIsPrint(false);
+				setIsOpenInvoice(false);
+				getInvoiceByCode(
+					response.data[0].identityCode,
+					(res) => {
+						setinvoiceInfo(res.data[0]);
+						setIsOpenReceipt(true);
+						setIsOpenInvoice(false);
+						console.error('SEARCH INVOICE', res);
+					},
+					() => {},
+				);
+			},
+			(error) => {},
+		);
 	};
 
 	return (
@@ -472,7 +562,7 @@ export const InvoiceCard = ({ ...props }) => {
 										isRtl={false}
 										name='color'
 										options={currenciesList}
-										defaultValue={formik.values.currency}
+										value={selectedCurrency}
 										onChange={(value) => {
 											handleSelectChange(value, 'currency');
 										}}
@@ -538,7 +628,7 @@ export const InvoiceCard = ({ ...props }) => {
 									<Select2
 										ariaLabel='Service'
 										placeholder='Choose...'
-										list={props.props.serviceList}
+										list={serviceList}
 										onChange={formik.handleChange('service')}
 										onBlur={formik.handleBlur}
 										value={formik.values.service}
@@ -603,7 +693,7 @@ export const InvoiceCard = ({ ...props }) => {
 										isRtl={false}
 										name='color'
 										options={paymentList}
-										defaultValue={formik.values.paymentMode}
+										value={selectedPayment}
 										onChange={(value) => {
 											handleSelectChange(value, 'paymentMode');
 										}}
@@ -744,7 +834,7 @@ export const InvoiceCard = ({ ...props }) => {
 									<Select2
 										ariaLabel='Bank Account'
 										placeholder='Choose...'
-										list={props.props.bankAccountingTypeList}
+										list={bankAccountingTypeList}
 										onChange={formik.handleChange('bankAccountType')}
 										onBlur={formik.handleBlur}
 										value={formik.values.bankAccountType}
@@ -805,7 +895,12 @@ export const InvoiceCard = ({ ...props }) => {
 									hoverShadow={'none'}
 									tag={'button'}
 									type={'button'}
-									tabIndex={64}>
+									tabIndex={64}
+									onClick={() => {
+										formik.resetForm();
+										setSelectedTab(1);
+										setTabValidity([true, false, false]);
+									}}>
 									New
 								</Button>
 							</FormGroup>
@@ -818,35 +913,56 @@ export const InvoiceCard = ({ ...props }) => {
 							<h6>
 								<b>Credit Information</b>
 							</h6>
-							<p style={{ margin: 0 }}>Available/Disponible: 14.6905</p>
-							<p style={{ margin: 0 }}>Limit/Limite: 1150.0000</p>
-							<p style={{ margin: 0 }}>Extend Credit: 0.0000</p>
-							<p style={{ margin: 0 }}>Balance: 1135.3095</p>
-							<hr style={{ marginBottom: 40 }}></hr>
-							<Checks
-								checked='radio value'
-								id='preReceiptType'
-								label='One receipt per page'
-								name='preReceiptType'
-								onChange={() => setPreReceiptType(1)}
-								type='radio'
-								value='radio value'
-							/>
-							<Checks
-								checked='radio value'
-								id='preReceiptType'
-								label='Pos printer'
-								name='preReceiptType'
-								onChange={() => setPreReceiptType(3)}
-								type='radio'
-								value='radio value'
-							/>
+							<p style={{ margin: 0 }}>
+								Available/Disponible:{' '}
+								{userSession.dataCredit.agencyCredit.toFixed(4)}
+							</p>
+							<p style={{ margin: 0 }}>
+								Limit/Limite: {userSession.dataCredit.agencyLimit.toFixed(4)}
+							</p>
+							<p style={{ margin: 0 }}>
+								Extend Credit:{' '}
+								{userSession.dataCredit.agencyExtendeCredit.toFixed(4)}
+							</p>
+							<p style={{ margin: 0 }}>
+								Balance: {userSession.dataCredit.agencyBalance.toFixed(4)}
+							</p>
+							<hr style={{ marginBottom: 30 }}></hr>
+							<Button
+								color='info'
+								isActive={preReceiptType != 3}
+								icon={
+									preReceiptType != 3
+										? 'radio-button-checked'
+										: 'radio-button-unchecked'
+								}
+								size={'sm'}
+								style={{ marginTop: 20, width: '100%' }}
+								isLink
+								onClick={() => setPreReceiptType(1)}>
+								One receipt per page
+							</Button>
+							<Button
+								color='info'
+								icon={
+									preReceiptType === 3
+										? 'radio-button-checked'
+										: 'radio-button-unchecked'
+								}
+								isActive={preReceiptType === 3}
+								size={'sm'}
+								isLink
+								style={{ marginTop: 20, width: '100%' }}
+								onClick={() => setPreReceiptType(3)}>
+								Pos printer
+							</Button>
 							<Button
 								style={{ marginTop: 20, width: '100%' }}
 								color='info'
 								icon='help'
 								isLight
-								size={'lg'}>
+								size={'lg'}
+								onClick={() => setIsOpenHelp(true)}>
 								Help
 							</Button>
 						</CardBody>
@@ -937,43 +1053,164 @@ export const InvoiceCard = ({ ...props }) => {
 				isOpen={isOpenInvoice}
 				titleId='transfer-modal'>
 				<ModalHeader setIsOpen={setIsOpenInvoice}>
-					<div className='row'>
-						<div className='col-12' style={{ marginBottom: 20 }}>
-							<Button
-								color='primary'
-								size={'lg'}
-								icon='print'
-								onClick={() => handlePrint()}></Button>
-						</div>
+					<ModalTitle id='example-title'>
+						{preReceiptType != 3 ? 'One receipt per page' : 'Pos printer'}
+					</ModalTitle>
+				</ModalHeader>
+				<ModalBody className='h-100 d-flex align-items-center'>
+					<Card>
+						<CardHeader>
+							<CardLabel>
+								<Button
+									color='primary'
+									size={'lg'}
+									icon='print'
+									onClick={() => handlePrint()}
+									style={{ marginBottom: 10 }}
+								/>
+								<CardSubTitle>
+									{!isPrint &&
+										'Print pre-receipt to continue with the receipt/ Imprimir pre-recibo para continuar con el recibo'}
+								</CardSubTitle>
+							</CardLabel>
+							{isPrint && (
+								<CardActions>
+									<Button hoverShadow='default' isDisable isLink isLight>
+										YOU AGREE AND WISH TO CONTINUE?
+									</Button>
+									<Button
+										color='info'
+										hoverShadow='default'
+										icon='Save'
+										isLight
+										onClick={() => save()}>
+										YES
+									</Button>
+									<Button
+										color='danger'
+										hoverShadow='default'
+										icon='cancel'
+										isLight
+										onClick={() => {
+											setIsPrint(false);
+											setIsOpenInvoice(false);
+										}}>
+										NO
+									</Button>
+								</CardActions>
+							)}
+						</CardHeader>
+						<CardBody id='modalContent'>
+							{preReceiptType != 3 ? (
+								<PreReceipt
+									agency={userSession.user.agency}
+									invoiceInfo={formik.values}
+									sender={senderInformation}
+									recipient={recipientInformation}
+									currencyDest={selectedCurrency?.value}
+								/>
+							) : (
+								<PosPreReceipt
+									agency={userSession.user.agency}
+									invoiceInfo={formik.values}
+									sender={senderInformation}
+									recipient={recipientInformation}
+									currencyDest={selectedCurrency?.value}
+								/>
+							)}
+						</CardBody>
+					</Card>
+				</ModalBody>
+			</Modal>
+			<Modal
+				setIsOpen={setIsOpenHelp}
+				size={'xl'}
+				isOpen={isOpenHelp}
+				titleId='transfer-modal'>
+				<ModalHeader setIsOpen={setIsOpenHelp}>
+					<div className='row w-100'>
 						<div className='col-12'>
-							<h6>
-								Print pre-receipt to continue with the receipt/ Imprimir pre-recibo
-								para continuar con el recibo
-							</h6>
+							<img
+								width='200'
+								height='100'
+								src='https://www.choicemoneytransfer.com/newsite/cmtlogo.png'
+							/>
+						</div>
+						<div className='col-12 d-flex justify-content-center align-items-center'>
+							<h4 className='m-0'>Welcome to Technical Support</h4>
 						</div>
 					</div>
 				</ModalHeader>
 				<ModalBody id='modalContent' className='h-100 d-flex align-items-center'>
-					{preReceiptType != 3 ? (
-						<PreReceipt
-							agency={userSession.user.agency}
-							invoiceInfo={formik.values}
-							sender={senderInformation}
-							recipient={recipientInformation}
-							currencyDest={selectedCurrency}
-						/>
-					) : (
-						<PosPreReceipt
-							agency={userSession.user.agency}
-							invoiceInfo={formik.values}
-							sender={senderInformation}
-							recipient={recipientInformation}
-							currencyDest={selectedCurrency}
-						/>
-					)}
+					<div className='row'>
+						<div className='col-12 d-flex justify-content-center align-items-center'>
+							<img
+								className='h-50 w-50 d-inline-block'
+								src='https://www.choicemoneytransfer.com/newsite/screenconnect.png'
+							/>
+						</div>
+						<div className='col-12 d-flex justify-content-center align-items-center'>
+							<p>
+								CHOICE MONEY TRANSFER-SW TECHNICIAN ONLY USES SCREEN CONNECT to
+								Connect to your computers. Technicians using Teamviewer, Showmypc,
+								Any desk or any other tool are NOT FROM CHOICE MONEY TRANSFER. If a
+								CHOICE MONEY TRANSFER-SW Technician calls and ask for a Teamviewer,
+								Showmypc, Any desk or any other tool different that Screen Connect,
+								DO NOT ALLOW IT. HANG UP AND CALL BACK TO TECHNICAL SUPPORT (212)
+								2689290 Option 3.
+							</p>
+						</div>
+						<div className='col-12 d-flex justify-content-center align-items-center'>
+							<p>
+								LOS TÉCNICOS DE CHOICE MONEY TRANSFER-SW SÓLO UTILIZAN SCREEN
+								CONNECT para conectarse a sus computadoras. Técnicos que utilizan
+								Teamviewer, Showmypc, o Anydesk o cualquier otra herramienta, NO
+								PERTENECEN A CHOICE MONEY TRANSFER. Si un técnico de CHOICE MONEY
+								TRANSFER-SW llama y pregunta por Teamviewer, Showmypc, Anydesk o
+								cualquier otra herramienta diferente a Screen Connect, NO PERMITA
+								QUE SE CONECTE, CUELGUE Y LLAME A SOPORTE SERVICIO TÉCNICO AL (212)
+								2689290, Opcion 3.
+							</p>
+						</div>
+					</div>
+				</ModalBody>
+				<ModalFooter>
+					<Button
+						style={{ marginTop: 20, width: '100%' }}
+						color='info'
+						icon='help'
+						isLight
+						size={'lg'}
+						onClick={() => window.open('https://cmtsw.screenconnect.com/', '_blank')}>
+						Download Screen Connect - Descargar Screen Connect
+					</Button>
+				</ModalFooter>
+			</Modal>
+			<Modal
+				setIsOpen={setIsOpenReceipt}
+				size={'xl'}
+				isOpen={isOpenReceipt}
+				titleId='transfer-modal'>
+				<ModalHeader setIsOpen={setIsOpenReceipt}>
+					<ModalTitle id='example-title'>Receipt</ModalTitle>
+				</ModalHeader>
+				<ModalBody className='h-100 d-flex align-items-center'>
+					<ReceiptOnePage
+						items={invoiceInfo}
+						recipient={recipientInformation}
+						sender={senderInformation}
+					/>
 				</ModalBody>
 			</Modal>
 		</div>
 	);
 };
+
+InvoiceCard.propTypes = {
+	bankAccountingTypeList: PropTypes.array.isRequired,
+	serviceList: PropTypes.array.isRequired,
+	setSelectedTab: PropTypes.any.isRequired,
+	setTabValidity: PropTypes.any.isRequired,
+};
+
 export default InvoiceCard;

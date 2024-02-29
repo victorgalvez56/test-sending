@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Recipients, SearchInvoice } from '../../services/NewTransactionService';
+import { Recipients } from '../../services/NewTransactionService';
 import { Sender } from '../../services/TransactionsService';
 
 interface PosPreReceiptProps {
@@ -24,7 +24,7 @@ interface PosPreReceiptProps {
 	recipient: Recipients;
 	sender: Sender;
 	agency: string;
-	currencyDest: string | undefined;
+	currencyDest: string | undefined | number;
 }
 
 export const PosPreReceipt: FC<PosPreReceiptProps> = ({

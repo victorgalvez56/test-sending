@@ -12,16 +12,12 @@ import Avatar, { AvatarGroup } from '../../../../components/Avatar';
 import USERS from '../../../../common/data/userDummyData';
 import useDarkMode from '../../../../hooks/useDarkMode';
 import { useNavigate } from 'react-router-dom';
-import { demoPagesMenu } from '../../../../menu';
 
 const CommonDashboardMarketingTeam = () => {
 	const { darkModeStatus } = useDarkMode();
 
 	const navigate = useNavigate();
-	const handleOnClickToEmployeeListPage = useCallback(
-		() => navigate(``),
-		[navigate],
-	);
+	const handleOnClickToEmployeeListPage = useCallback(() => navigate(``), [navigate]);
 
 	return (
 		<Card stretch>

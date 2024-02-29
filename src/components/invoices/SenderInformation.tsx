@@ -1,26 +1,43 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '../bootstrap/Button';
-import Page from '../../layout/Page/Page';
-import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import useDarkMode from '../../hooks/useDarkMode';
-import Card, { CardBody, CardHeader } from '../bootstrap/Card';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
-import InputGroup from '../bootstrap/forms/InputGroup';
-import Select from '../bootstrap/forms/Select';
 import Checks, { ChecksGroup } from '../bootstrap/forms/Checks';
-import { Tabs2 } from '../transactions/Tabs';
-import { demoPagesMenu } from '../../menu';
 import Modal, { ModalBody, ModalFooter, ModalTitle } from '../bootstrap/Modal';
-import { Sender } from '../../services/InvoiceServices';
+import {
+	Sender,
+	AgencyStatusResponse,
+	getTypeidentification,
+	InvoiceReponse,
+} from '../../services/InvoiceServices';
 
 interface SenderInformationProps {
 	items: Sender[];
 }
 
 export const SenderInformation: React.FC<SenderInformationProps> = ({ items }) => {
+	const [typeIdentifications, setTypeIdentification] = useState<AgencyStatusResponse | null>(
+		null,
+	);
+
+	useEffect(() => {
+		items.forEach((invoiceResponse) => {
+			const typeIdentification = invoiceResponse.typeId;
+			getTypeidentification(
+				typeIdentification,
+				(response: AgencyStatusResponse) => {
+					setTypeIdentification(response);
+					console.error('lo ultimo', response);
+				},
+				(error) => {
+					console.error('Error fetching data:', error);
+				},
+			);
+		});
+	}, [items]);
+
 	const formik = useFormik({
 		enableReinitialize: true,
 		initialValues: {
@@ -112,7 +129,7 @@ export const SenderInformation: React.FC<SenderInformationProps> = ({ items }) =
 	return (
 		<>
 			{items.map((item, index) => (
-				<div className='row mt-3 justify-content-center'>
+				<div key={index} className='row mt-3'>
 					<div className='col-md-2 m-2'>
 						<FormGroup id='fname' label='First Name'>
 							<Input
@@ -331,7 +348,7 @@ export const SenderInformation: React.FC<SenderInformationProps> = ({ items }) =
 								autoComplete='address'
 								onChange={formik.handleChange}
 								onBlur={formik.handleBlur}
-								value={item.typeId}
+								value={typeIdentifications?.data[0].name}
 								isValid={formik.isValid}
 								isTouched={formik.touched.mname2}
 								invalidFeedback={formik.errors.mname2}
@@ -361,7 +378,7 @@ export const SenderInformation: React.FC<SenderInformationProps> = ({ items }) =
 								autoComplete='country'
 								onChange={formik.handleChange}
 								onBlur={formik.handleBlur}
-								value={item.expDateId}
+								value={item.expDateId.split('T')[0]}
 								isValid={formik.isValid}
 								isTouched={formik.touched.mname2}
 								invalidFeedback={formik.errors.mname2}
@@ -376,7 +393,7 @@ export const SenderInformation: React.FC<SenderInformationProps> = ({ items }) =
 								autoComplete='state'
 								onChange={formik.handleChange}
 								onBlur={formik.handleBlur}
-								value={item.birthDate}
+								value={item.birthDate.split('T')[0]}
 								isValid={formik.isValid}
 								isTouched={formik.touched.mname2}
 								invalidFeedback={formik.errors.mname2}

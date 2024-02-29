@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -13,6 +13,7 @@ import useDarkMode from '../../../hooks/useDarkMode';
 import { useFormik } from 'formik';
 import Spinner from '../../../components/bootstrap/Spinner';
 import {
+	getCreditInformation,
 	getUser,
 	login,
 	resend2FA,
@@ -64,7 +65,7 @@ interface ILoginProps {
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { i18n } = useTranslation();
 	const { setUser } = useContext(AuthContext);
-	const { darkModeStatus, setDarkModeStatus } = useDarkMode();
+	const { darkModeStatus } = useDarkMode();
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	const navigate = useNavigate();
@@ -103,7 +104,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							response.idUser,
 							response.idUser,
 							(data) => {
-								setUserSessionData(data.data[0], response.data[0].currency, response.data[0].typeReceiptPrint);
+								getCreditInformation(
+									data.data[0].agency,
+									(res) => {
+										setUserSessionData(
+											data.data[0],
+											response.data[0].currency,
+											response.data[0].typeReceiptPrint,
+											res.data[0].agencyCredit,
+											res.data[0].agencyBalance,
+											res.data[0].agencyExtendeCredit,
+											res.data[0].agencyLimit,
+										);
+									},
+									(error) => {
+										console.error(error);
+									},
+								);
 								setUser(data.data[0]);
 							},
 							(error) => {
@@ -115,7 +132,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							response.idUser,
 							response.idUser,
 							(data) => {
-								setUserSessionData(data.data[0], response.data[0].currency,response.data[0].typeReceiptPrint);
+								getCreditInformation(
+									data.data[0].agency,
+									(res) => {
+										setUserSessionData(
+											data.data[0],
+											response.data[0].currency,
+											response.data[0].typeReceiptPrint,
+											res.data[0].agencyCredit,
+											res.data[0].agencyBalance,
+											res.data[0].agencyExtendeCredit,
+											res.data[0].agencyLimit,
+										);
+									},
+									(error) => {
+										console.error(error);
+									},
+								);
 								setUser(data.data[0]);
 								handleOnClick();
 							},

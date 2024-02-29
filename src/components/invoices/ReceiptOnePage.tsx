@@ -1,19 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
-import Button from '../bootstrap/Button';
-import Page from '../../layout/Page/Page';
-import PageWrapper from '../../layout/PageWrapper/PageWrapper';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import useDarkMode from '../../hooks/useDarkMode';
-import Card, { CardBody, CardHeader } from '../bootstrap/Card';
-import FormGroup from '../bootstrap/forms/FormGroup';
-import Input from '../bootstrap/forms/Input';
-import InputGroup from '../bootstrap/forms/InputGroup';
-import Select from '../bootstrap/forms/Select';
-import Checks from '../bootstrap/forms/Checks';
-import { Tabs2 } from '../transactions/Tabs';
-import { demoPagesMenu } from '../../menu';
+import React, { useState } from 'react';
 import { InvoiceReponse } from '../../services/InvoiceServices';
+import { SearchInvoice } from '../../services/NewTransactionService';
 
 interface InvoiceInformationProps {
 	items: InvoiceReponse[];
@@ -46,7 +33,7 @@ export const ReceiptOnePage: React.FC<InvoiceInformationProps> = ({ items }) => 
 	return (
 		<>
 			{items.map((item, index) => (
-				<table border={1} style={{ height: 600 }}>
+				<table key={index} border={1} style={{ height: 600 }}>
 					<tbody>
 						<tr>
 							<td style={cellStyle} colSpan={3}>

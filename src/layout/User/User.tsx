@@ -1,4 +1,4 @@
-import React, { useState, useContext, ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -13,7 +13,7 @@ import useNavigationItemHandle from '../../hooks/useNavigationItemHandle';
 import { deleteSession, getSession } from '../../services/AuthService';
 
 const User = () => {
-	const session = getSession()
+	const session = getSession();
 	const navigate = useNavigate();
 	const handleItem = useNavigationItemHandle();
 	const { darkModeStatus, setDarkModeStatus } = useDarkMode();
@@ -49,7 +49,7 @@ const User = () => {
 					<Button
 						icon='AccountBox'
 						onClick={
-							() => { }
+							() => {}
 							// navigate(
 							// 	`../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
 							// )
@@ -101,7 +101,7 @@ const User = () => {
 							role='presentation'
 							className='navigation-item cursor-pointer'
 							onClick={() => {
-								deleteSession()
+								deleteSession();
 								navigate(`../${demoPagesMenu.login.path}`);
 							}}>
 							<span className='navigation-link navigation-link-pill'>
